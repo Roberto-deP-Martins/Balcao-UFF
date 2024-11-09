@@ -1,1 +1,13 @@
-spring.application.name=balcao-uff
+server:
+  error:
+    include-stacktrace: on-param
+
+spring:
+  profiles:
+    active: dev
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

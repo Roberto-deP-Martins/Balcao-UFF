@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/balcao_uff
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: 1996
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+
+  sql:
+    init:
+      data-locations: classpath:data.sql
+
+server:
+  port: 8080
