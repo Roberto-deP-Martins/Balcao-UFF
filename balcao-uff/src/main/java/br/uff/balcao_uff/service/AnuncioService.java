@@ -9,6 +9,5 @@ import lombok.AllArgsConstructor;
 @Service
 public class AnuncioService {
 
-	private final AnuncioRepository anuncioRepository;
 
 }

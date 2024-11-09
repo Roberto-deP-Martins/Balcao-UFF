@@ -7,5 +7,4 @@ import br.uff.balcao_uff.entity.UserEntity;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
-	UserEntity findByEmail(String email);
 }

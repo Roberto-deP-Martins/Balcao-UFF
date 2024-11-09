@@ -1,12 +1,9 @@
 package br.uff.balcao_uff.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.uff.balcao_uff.entity.AnuncioEntity;
+import br.uff.balcao_uff.entity.UserEntity;
 
-public interface UserRepository extends JpaRepository<AnuncioEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-	List<AnuncioEntity> findByCategory(String category);
 }
