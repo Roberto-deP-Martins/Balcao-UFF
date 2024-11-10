@@ -12,6 +12,9 @@ public interface AnuncioResourceApi {
 	
 	@Operation(summary = "Create a new advertisement")
 	public ResponseEntity<AnuncioResponseDTO> save(AnuncioRequestDTO anuncioRequestDTO);
+	
+	@Operation(summary = "Update advertisement")
+	public ResponseEntity<String> update(AnuncioRequestDTO anuncioRequestDTO);
 
 	@Operation(summary = "Get all advertisements")
 	public ResponseEntity<List<AnuncioResponseDTO>> findAll();

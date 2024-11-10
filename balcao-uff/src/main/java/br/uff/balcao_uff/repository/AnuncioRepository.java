@@ -1,12 +1,9 @@
 package br.uff.balcao_uff.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.uff.balcao_uff.entity.MessageEntity;
+import br.uff.balcao_uff.entity.AnuncioEntity;
 
-public interface AnuncioRepository extends JpaRepository<MessageEntity, Long> {
+public interface AnuncioRepository extends JpaRepository<AnuncioEntity, Long> {
 
-	List<MessageEntity> findByReceiverId(Long receiverId);
 }
