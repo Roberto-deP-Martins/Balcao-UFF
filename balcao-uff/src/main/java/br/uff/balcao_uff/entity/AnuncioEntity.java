@@ -49,6 +49,7 @@ public class AnuncioEntity implements Serializable {
 	
 	@JsonProperty(value = "location")
 	private String location;
+	
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
