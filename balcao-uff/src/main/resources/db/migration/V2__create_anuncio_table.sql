@@ -1,4 +1,5 @@
 -- V2__create_anuncio_table.sql
+
 CREATE TABLE IF NOT EXISTS tb_anuncio (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     title VARCHAR(255) NOT NULL,
@@ -8,5 +9,5 @@ CREATE TABLE IF NOT EXISTS tb_anuncio (
     contactInfo VARCHAR(255),
     location VARCHAR(255),
     user_id BIGINT,
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES tb_user(id)
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES tb_users(id)
 );
