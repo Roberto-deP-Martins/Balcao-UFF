@@ -12,26 +12,36 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.uff.balcao_uff.api.dto.AuthenticationDTO;
 import br.uff.balcao_uff.api.dto.request.UserRequestDTO;
+import br.uff.balcao_uff.api.dto.response.LoginResponseDTO;
+import br.uff.balcao_uff.api.resource.swagger.AutentiticationResourceApi;
+import br.uff.balcao_uff.configuration.security.TokenService;
 import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.repository.UserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 
 @RestController
 @RequestMapping("/auth")
-public class AutentiticationResource {
+@Tag(name = "Autenticação", description = "Autenticação e criação de usuário")
+public class AutentiticationResource implements AutentiticationResourceApi{
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
 	@Autowired
 	private UserRepository repository;
+	
+	@Autowired
+	TokenService tokenService;
 
 	@PostMapping("/login")
 	public ResponseEntity  login(@RequestBody @Valid AuthenticationDTO data) {
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.cpf(), data.password());
 		var auth = this.authenticationManager.authenticate(usernamePassword);
-		return ResponseEntity.ok().build();
+		
+		var token = tokenService.generateToken((UserEntity)auth.getPrincipal());
+		return ResponseEntity.ok(new LoginResponseDTO(token));
 	}
 	
 	@PostMapping("/register")

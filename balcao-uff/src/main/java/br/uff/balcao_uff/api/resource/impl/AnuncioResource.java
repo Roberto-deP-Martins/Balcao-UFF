@@ -2,6 +2,7 @@ package br.uff.balcao_uff.api.resource.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import br.uff.balcao_uff.api.resource.swagger.AnuncioResourceApi;
+import br.uff.balcao_uff.configuration.security.TokenService;
 import br.uff.balcao_uff.service.AnuncioService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,9 @@ public class AnuncioResource implements AnuncioResourceApi{
 
     private final AnuncioService service;
     
-    private static String caminhoImagens = "/home/jhonatan-silva/faculdade/gerencia_processos/Balcao-UFF/imagens/";
-
+    @Autowired
+	TokenService tokenService;
+    
     @PostMapping("/save")
     public ResponseEntity<AnuncioResponseDTO> save(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
         AnuncioResponseDTO savedAnuncio = service.save(anuncioRequestDTO);

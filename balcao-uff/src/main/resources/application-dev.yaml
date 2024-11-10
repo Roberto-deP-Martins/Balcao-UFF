@@ -36,3 +36,8 @@ logging:
         type:
           descriptor:
             sql: TRACE
+
+#api:
+#  security:
+#    token:
+#      secret: ${JWT.SECRET:my-secret-key}
