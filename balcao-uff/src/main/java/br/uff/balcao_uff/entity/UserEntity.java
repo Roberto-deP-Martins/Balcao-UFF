@@ -38,6 +38,9 @@ public class UserEntity implements Serializable {
 	
 	@JsonProperty(value = "password")
 	private String password;
+
+	@JsonProperty(value = "cpf")
+	private String cpf;
 	
 	@JsonProperty(value = "role")
 	private String role;
