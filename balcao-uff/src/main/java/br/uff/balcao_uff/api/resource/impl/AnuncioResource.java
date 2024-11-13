@@ -11,6 +11,7 @@ import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import br.uff.balcao_uff.api.resource.swagger.AnuncioResourceApi;
 import br.uff.balcao_uff.configuration.security.TokenService;
+import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.service.AnuncioService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,13 @@ public class AnuncioResource implements AnuncioResourceApi{
 
     @GetMapping
     public ResponseEntity<List<AnuncioResponseDTO>> findAll() {
-        List<AnuncioResponseDTO> anuncios = service.findAll();
-        return ResponseEntity.ok(anuncios);
+//        List<AnuncioResponseDTO> anuncios = service.finnAll();
+        return null;
+    }
+    
+    @GetMapping("/all")
+    public ResponseEntity<List<AnuncioEntity>> getAll() {
+    	return ResponseEntity.ok(service.getAll());
     }
 
 	@Override

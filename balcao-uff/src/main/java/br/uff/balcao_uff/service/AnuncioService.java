@@ -65,12 +65,12 @@ public class AnuncioService {
     }
 
     // Método para listar todos os anúncios
-    public List<AnuncioResponseDTO> findAll() {
-        List<AnuncioEntity> anuncios = anuncioRepository.findAll();
-        return anuncios.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
+//    public List<AnuncioResponseDTO> findAll() {
+//        List<AnuncioEntity> anuncios = anuncioRepository.getAllAnuncios();
+//        return anuncios.stream()
+//                .map(this::convertToDto)
+//                .collect(Collectors.toList());
+//    }
 
     // Método auxiliar para converter a entidade para o DTO de resposta
     private AnuncioResponseDTO convertToDto(AnuncioEntity anuncioEntity) {
@@ -84,5 +84,9 @@ public class AnuncioService {
                 .location(anuncioEntity.getLocation())
                 .userId(anuncioEntity.getUser() != null ? anuncioEntity.getUser().getId() : null)
                 .build();
+    }
+    
+    public List<AnuncioEntity> getAll(){
+    	return anuncioRepository.findAllAnuncios();
     }
 }

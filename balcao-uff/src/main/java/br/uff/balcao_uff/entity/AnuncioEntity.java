@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,22 +35,22 @@ public class AnuncioEntity implements Serializable {
 
 	@JsonProperty(value = "title")
 	private String title;
-	
+
 	@JsonProperty(value = "description")
 	private String description;
-	
+
 	@JsonProperty(value = "category")
 	private String category;
 
 	@JsonProperty(value = "price")
 	private double price;
-	
+
 	@JsonProperty(value = "contactInfo")
+	@Column(name = "contactInfo")
 	private String contactInfo;
-	
+
 	@JsonProperty(value = "location")
 	private String location;
-	
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
