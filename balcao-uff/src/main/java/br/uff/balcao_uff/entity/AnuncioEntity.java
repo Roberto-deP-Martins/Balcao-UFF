@@ -45,8 +45,8 @@ public class AnuncioEntity implements Serializable {
 	@JsonProperty(value = "price")
 	private double price;
 
-	@JsonProperty(value = "contactInfo")
-	@Column(name = "contactInfo")
+	@JsonProperty(value = "contact_info")
+	@Column(name = "contact_info")
 	private String contactInfo;
 
 	@JsonProperty(value = "location")
