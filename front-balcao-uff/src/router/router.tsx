@@ -1,21 +1,20 @@
-// src/router/router.js
-import { createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter } from 'react-router-dom';
 import Home from '../presentation/Home/Home';
-import Login from '../presentation/Login/Login';
 import ListAdvertise from '../presentation/AdvertiseScene/ListAdvertise';
-import MainLayout from '../components/MainLayout';
+import Login from '../presentation/Login/Login';
 
 export const router = createBrowserRouter([
+
   {
-    path: '/',
-    element: <MainLayout />,
+    path: "/",
+    element: <Home />,
     children: [
       {
-        path: "/",
-        element: <Home />,
+        index: true,
+        element: <Navigate to="advertises" replace />,
       },
       {
-        path: "/advertises",
+        path: "advertises",
         element: <ListAdvertise />,
       },
     ],
