@@ -7,20 +7,21 @@ import MainLayout from '../components/MainLayout';
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <Login />, // Login route (doesn't use MainLayout)
-  },
-  {
-    element: <MainLayout />, // MainLayout wraps all these routes
+    path: '/',
+    element: <MainLayout />,
     children: [
       {
         path: "/",
-        element: <Home />, // Home route inside MainLayout
+        element: <Home />,
       },
       {
         path: "/advertises",
-        element: <ListAdvertise />, // ListAdvertise route inside MainLayout
+        element: <ListAdvertise />,
       },
     ],
+  },
+  {
+    path: "/login",
+    element: <Login />,
   },
 ]);
