@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import LoginService  from '../../service/LoginService'
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
@@ -8,6 +9,7 @@ const Login = () => {
     e.preventDefault();
     console.log('CPF:', cpf);
     console.log('Password:', password);
+    LoginService.login(cpf, password)
   };
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
