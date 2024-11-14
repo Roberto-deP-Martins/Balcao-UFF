@@ -10,7 +10,6 @@ const AdvertiseCard = ({ ad }: { ad: any }) => {
       <p className="text-sm text-gray-700">Preço: R$ {ad.price}</p>
       <p className="text-sm text-gray-700">Contato: {ad.contact_info}</p>
       <p className="text-sm text-gray-700">Localização: {ad.location}</p>
-      <p className="text-sm text-gray-500 mt-2">Anunciado por: {ad.user.name} ({ad.user.role})</p>
     </div>
   );
 };
