@@ -1,0 +1,275 @@
+{
+	"info": {
+		"_postman_id": "4022deab-19e7-4c72-8112-82739116820f",
+		"name": "balcao-uff",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28265523"
+	},
+	"item": [
+		{
+			"name": "Anuncios",
+			"item": [
+				{
+					"name": "find all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{local}}anuncios",
+							"host": [
+								"{{local}}anuncios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Venda de Livros\",\n  \"description\": \"Coleção de livros usados em excelente estado.\",\n  \"category\": \"Livros\",\n  \"price\": 150.00,\n  \"contactInfo\": \"contato@example.com\",\n  \"location\": \"Niterói, RJ\",\n  \"userId\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/anuncios/save",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"anuncios",
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6IjE1NzU5ODQ4NzA4IiwiZXhwIjoxNzMxNTk2OTc1fQ.TwxgFguZWS0kxxdXupXEqcWDNCEWDslYrk4NXn1cZXk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"title\": \"Venda de Notebook Gamer\",\n    \"description\": \"Notebook Gamer usado, em excelente estado, com 16GB de RAM e SSD de 512GB.\",\n    \"category\": \"Eletrônicos\",\n    \"price\": 4500.00,\n    \"contactInfo\": \"email@example.com\",\n    \"location\": \"Rio de Janeiro, RJ\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}anuncios/update",
+							"host": [
+								"{{local}}anuncios"
+							],
+							"path": [
+								"update"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usuários",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"12345678934\",\n    \"email\": \"roberto6@id.uff.br\",\n    \"name\": \"Rafael\",\n    \"password\": \"1234\",\n    \"role\": \"USER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}auth/register",
+							"host": [
+								"{{local}}auth"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"{{cpf}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}auth/login",
+							"host": [
+								"{{local}}auth"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"let host = pm.collectionVariables.get(\"local\");\r",
+					"let cpf = pm.collectionVariables.get(\"cpf\");\r",
+					"let password = pm.collectionVariables.get(\"password\");\r",
+					"\r",
+					"let body = JSON.stringify({\r",
+					"    \"cpf\": cpf,\r",
+					"    \"password\": password\r",
+					"});\r",
+					"\r",
+					"const postRequest = {\r",
+					"  url: host + 'auth/login',\r",
+					"  method: 'POST',\r",
+					"  header: {\r",
+					"    \"Content-Type\": \"application/json\",\r",
+					"    \"Accept\": \"*/*\"\r",
+					"  },\r",
+					"  body: body\r",
+					"};\r",
+					"\r",
+					"pm.sendRequest(postRequest, function (err, res) {\r",
+					"    if (err) {\r",
+					"        console.log(\"Error: \", err);\r",
+					"    } else {\r",
+					"        let jsonData = res.json();\r",
+					"        let token = jsonData.token; // Extraindo o token do corpo da resposta JSON\r",
+					"        console.log(\"Token atualizado: \" + token); // Imprimindo o token no console\r",
+					"        pm.collectionVariables.set('token', token); // Armazenando o token na variável de coleção\r",
+					"\r",
+					"        // Certifique-se de usar o token atualizado para as próximas requisições\r",
+					"        pm.request.headers.add({key: \"Authorization\", value: \"Bearer \" + token});\r",
+					"    }\r",
+					"});\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "local",
+			"value": "localhost:8080/",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cpf",
+			"value": "15759848708",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "123",
+			"type": "string"
+		}
+	]
+}
