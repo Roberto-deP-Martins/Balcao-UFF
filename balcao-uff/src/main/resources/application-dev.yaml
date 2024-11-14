@@ -9,7 +9,7 @@ spring:
         format_sql: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/balcao_uff
+    url: jdbc:postgresql://localhost:5432/balcao_anuncios_uff
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: 1996

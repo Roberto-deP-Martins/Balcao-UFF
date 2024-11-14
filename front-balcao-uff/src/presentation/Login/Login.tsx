@@ -1,15 +1,35 @@
 import { useState } from 'react';
-import LoginService  from '../../service/LoginService'
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('CPF:', cpf);
-    console.log('Password:', password);
-    LoginService.login(cpf, password)
+
+    try {
+      const response = await fetch('http://localhost:8080/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cpf, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        console.log('Login bem-sucedido, token salvo no localStorage.');
+
+        navigate('/');
+      } else {
+        console.error('Erro na autenticação:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Erro de requisição:', error);
+    }
   };
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +43,7 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center border border-gray-300 p-8 rounded-lg shadow-lg w-96 mx-auto mt-24 bg-white">
       <h2 className="text-2xl font-semibold mb-6">Entrar</h2>
-      <form onSubmit={(e) => handleSubmit(e)}>
+      <form onSubmit={handleSubmit}>
         <input 
           type="text" 
           placeholder="CPF" 
@@ -39,7 +59,7 @@ const Login = () => {
           className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          type='submit' 
+          type="submit"
           className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
         >
           Logar
