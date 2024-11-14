@@ -21,14 +21,11 @@ public class AnuncioService {
     private final AnuncioRepository anuncioRepository;
     private final UserRepository userRepository;
 
-    // Método para salvar um novo anúncio
     @Transactional
     public AnuncioResponseDTO save(AnuncioRequestDTO anuncioRequestDTO) {
-        // Busca o usuário pelo ID
         UserEntity user = userRepository.findById(anuncioRequestDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Converte o DTO para a entidade
         AnuncioEntity anuncioEntity = AnuncioEntity.builder()
                 .title(anuncioRequestDTO.getTitle())
                 .description(anuncioRequestDTO.getDescription())
@@ -36,23 +33,19 @@ public class AnuncioService {
                 .price(anuncioRequestDTO.getPrice())
                 .contactInfo(anuncioRequestDTO.getContactInfo())
                 .location(anuncioRequestDTO.getLocation())
-                .user(user)  // Associa o usuário encontrado
+                .user(user)
                 .build();
 
-        // Salva a entidade
         AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
 
-        // Retorna o DTO de resposta
         return convertToDto(savedAnuncio);
     }
 
-    // Método para atualizar um anúncio existente
     @Transactional
     public void update(AnuncioRequestDTO anuncioRequestDTO) {
         AnuncioEntity existingAnuncio = anuncioRepository.findById(anuncioRequestDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
 
-        // Atualiza os campos da entidade
         if (anuncioRequestDTO.getTitle() != null) existingAnuncio.setTitle(anuncioRequestDTO.getTitle());
         if (anuncioRequestDTO.getDescription() != null) existingAnuncio.setDescription(anuncioRequestDTO.getDescription());
         if (anuncioRequestDTO.getCategory() != null) existingAnuncio.setCategory(anuncioRequestDTO.getCategory());
@@ -60,19 +53,35 @@ public class AnuncioService {
         if (anuncioRequestDTO.getContactInfo() != null) existingAnuncio.setContactInfo(anuncioRequestDTO.getContactInfo());
         if (anuncioRequestDTO.getLocation() != null) existingAnuncio.setLocation(anuncioRequestDTO.getLocation());
 
-        // Salva a entidade atualizada
         anuncioRepository.save(existingAnuncio);
     }
 
-    // Método para listar todos os anúncios
     public List<AnuncioResponseDTO> findAll() {
         List<AnuncioEntity> anuncios = anuncioRepository.findAll();
         return anuncios.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+    
+    public List<AnuncioResponseDTO> findByCategory(String category){
+    	
+    	List<AnuncioEntity> anuncios = anuncioRepository.findByCategory(category);
+    	return anuncios.stream()
+    			.map(this::convertToDto) 
+    			.collect(Collectors.toList()); 
+    }
+    
+    @Transactional public void deleteById(Long id) { 
+    	AnuncioEntity existingAnuncio = anuncioRepository.findById(id) 
+    			.orElseThrow(() -> new RuntimeException("Anúncio não encontrado")); 
+    			anuncioRepository.delete(existingAnuncio);
+    }
 
-    // Método auxiliar para converter a entidade para o DTO de resposta
+    /**
+     * Método auxiliar para converter a entidade para o DTO de resposta
+     * @param anuncioEntity
+     * @return
+     */
     private AnuncioResponseDTO convertToDto(AnuncioEntity anuncioEntity) {
         return AnuncioResponseDTO.builder()
                 .id(anuncioEntity.getId())
