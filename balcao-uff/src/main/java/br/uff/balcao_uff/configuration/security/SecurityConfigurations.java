@@ -35,6 +35,8 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/anuncios").authenticated()
                         .requestMatchers(HttpMethod.GET, "/anuncios").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/anuncios/category").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/anuncios/delete").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
