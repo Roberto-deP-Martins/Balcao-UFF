@@ -12,7 +12,7 @@ const ListAdvertise = () => {
   const [location, setLocation] = useState<string>('');
   const [userId, setUserId] = useState<number | ''>('');
   const [advertises, setAdvertises] = useState<any[]>([]);
-  const [error, setError] = useState<string>(''); // Estado para a mensagem de erro
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchAdvertises = async () => {
@@ -49,7 +49,7 @@ const ListAdvertise = () => {
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(''); // Limpar a mensagem de erro antes de tentar salvar
+    setError('');
 
     const token = localStorage.getItem('token');
 
