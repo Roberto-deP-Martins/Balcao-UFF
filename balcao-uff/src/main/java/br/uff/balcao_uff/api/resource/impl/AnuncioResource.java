@@ -21,42 +21,36 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @Tag(name = "Anuncios", description = "Gerenciamento de Anúncios")
-public class AnuncioResource implements AnuncioResourceApi{
+public class AnuncioResource implements AnuncioResourceApi {
 
-    private final AnuncioService service;
-    
-    @Autowired
+	private final AnuncioService service;
+
+	@Autowired
 	TokenService tokenService;
-    
-    @PostMapping("/save")
-    public ResponseEntity<AnuncioResponseDTO> save(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
-        AnuncioResponseDTO savedAnuncio = service.save(anuncioRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
-    }
 
-    @PostMapping("/update") 
-    public ResponseEntity<String> update(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
-        try {
-            service.update(anuncioRequestDTO); 
-            return ResponseEntity.ok("Anúncio atualizado com sucesso!");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro ao atualizar anúncio: " + e.getMessage());  // Retorna 404 se não encontrado
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao atualizar anúncio.");  // Retorna 500 em caso de erro genérico
-        }
-    }
+	@PostMapping("/save")
+	public ResponseEntity<AnuncioResponseDTO> save(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
+		AnuncioResponseDTO savedAnuncio = service.save(anuncioRequestDTO);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
+	}
 
+	@PostMapping("/update")
+	public ResponseEntity<String> update(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
+		try {
+			service.update(anuncioRequestDTO);
+			return ResponseEntity.ok("Anúncio atualizado com sucesso!");
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro ao atualizar anúncio: " + e.getMessage()); 
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao atualizar anúncio."); 
+		}
+	}
 
-    @GetMapping
-    public ResponseEntity<List<AnuncioResponseDTO>> findAll() {
-//        List<AnuncioResponseDTO> anuncios = service.finnAll();
-        return null;
-    }
-    
-    @GetMapping("/all")
-    public ResponseEntity<List<AnuncioEntity>> getAll() {
-    	return ResponseEntity.ok(service.getAll());
-    }
+	@GetMapping
+	public ResponseEntity<List<AnuncioResponseDTO>> findAll() {
+		List<AnuncioResponseDTO> anuncios = service.findAll();
+		return ResponseEntity.ok(anuncios);
+	}
 
 	@Override
 	public ResponseEntity<AnuncioResponseDTO> findById(Long id) {
