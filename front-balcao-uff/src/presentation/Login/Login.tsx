@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // Estado para mensagem de erro
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,12 +23,15 @@ const Login = () => {
         const data = await response.json();
         localStorage.setItem('token', data.token);
         console.log('Login bem-sucedido, token salvo no localStorage.');
+        setError('');
 
         navigate('/');
       } else {
+        setError('Erro na autenticação. Verifique suas credenciais e tente novamente.');
         console.error('Erro na autenticação:', response.statusText);
       }
     } catch (error) {
+      setError('Erro de requisição. Tente novamente mais tarde.');
       console.error('Erro de requisição:', error);
     }
   };
@@ -65,6 +69,11 @@ const Login = () => {
           Logar
         </button>
       </form>
+      {error && (
+        <div className="mt-4 text-red-500">
+          {error}
+        </div>
+      )}
       <a 
         href="#" 
         className="mt-4 text-sm text-blue-600 hover:underline"

@@ -12,6 +12,7 @@ const ListAdvertise = () => {
   const [location, setLocation] = useState<string>('');
   const [userId, setUserId] = useState<number | ''>('');
   const [advertises, setAdvertises] = useState<any[]>([]);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchAdvertises = async () => {
@@ -48,6 +49,7 @@ const ListAdvertise = () => {
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
 
     const token = localStorage.getItem('token');
 
@@ -73,12 +75,13 @@ const ListAdvertise = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao salvar anúncio');
+        const errorData = await response.json();
+        setError(`Erro ao salvar anúncio: ${errorData.message || 'Verifique os dados e tente novamente.'}`);
+        return;
       }
 
       const data = await response.json();
       console.log('Anúncio salvo com sucesso:', data);
-
 
       setTitle('');
       setDescription('');
@@ -89,6 +92,7 @@ const ListAdvertise = () => {
       setUserId('');
       setActiveTab('list');
     } catch (error) {
+      setError('Erro ao salvar anúncio. Verifique os dados e tente novamente.');
       console.error('Erro ao salvar anúncio:', error);
     }
   };
@@ -126,6 +130,11 @@ const ListAdvertise = () => {
 
       {activeTab === 'create' && (
         <form onSubmit={handleSave} className="space-y-4 p-4">
+          {error && (
+            <div className="text-red-500 mb-4">
+              {error}
+            </div>
+          )}
           <input
             type="text"
             placeholder="Título"

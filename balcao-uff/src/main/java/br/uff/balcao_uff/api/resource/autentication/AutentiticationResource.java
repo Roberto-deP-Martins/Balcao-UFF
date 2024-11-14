@@ -1,6 +1,8 @@
 package br.uff.balcao_uff.api.resource.autentication;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,9 +16,11 @@ import br.uff.balcao_uff.api.dto.AuthenticationDTO;
 import br.uff.balcao_uff.api.dto.request.UserRequestDTO;
 import br.uff.balcao_uff.api.dto.response.LoginResponseDTO;
 import br.uff.balcao_uff.api.resource.swagger.AutentiticationResourceApi;
+import br.uff.balcao_uff.configuration.security.SecurityConfigurations;
 import br.uff.balcao_uff.configuration.security.TokenService;
 import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.repository.UserRepository;
+import ch.qos.logback.classic.Logger;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -45,15 +49,26 @@ public class AutentiticationResource implements AutentiticationResourceApi{
 	}
 	
 	@PostMapping("/register")
-	public ResponseEntity register(@RequestBody @Valid UserRequestDTO data) {
-		if(this.repository.findByCpf(data.cpf()) != null) {
-			return ResponseEntity.badRequest().build();
-		}
-		String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-		UserEntity newUser = new UserEntity(data.name(), data.email(), encryptedPassword, data.cpf(), data.role());
-		
-		this.repository.save(newUser);
-		return ResponseEntity.ok().build();
-		
+	public ResponseEntity<String> register(@RequestBody @Valid UserRequestDTO data) {
+	    Logger logger = (Logger) LoggerFactory.getLogger(SecurityConfigurations.class);
+
+	    try {
+	        if (this.repository.findByCpf(data.cpf()) != null) {
+	            logger.error("User with CPF " + data.cpf() + " already exists.");
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with this CPF already exists.");
+	        }
+
+	        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+	        UserEntity newUser = new UserEntity(data.name(), data.email(), encryptedPassword, data.cpf(), data.role());
+
+	        this.repository.save(newUser);
+
+	        logger.info("User registered successfully with CPF " + data.cpf());
+	        return ResponseEntity.ok("User registered successfully.");
+	    } catch (Exception e) {
+	        logger.error("Error occurred while registering user: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while registering the user.");
+	    }
 	}
+
 }

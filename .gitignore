@@ -1,0 +1,46 @@
+# Ignorar pastas de dependências do Node.js e Maven
+node_modules/
+target/
+
+# Ignorar pastas de build do React e Spring Boot
+dist/
+build/
+
+# Cache do ESLint
+.eslintcache
+
+# Arquivos de log
+*.log
+*.log.*
+
+# Configurações da IDE
+.idea/
+.vscode/
+
+# Arquivos temporários do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de ambiente (variáveis de configuração)
+.env
+.env.local
+.env.production
+
+# Arquivos específicos do Maven
+*.mvn
+.mvn/wrapper/maven-wrapper.jar
+
+# Arquivos de compilação e cache
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.swp
+
+# Arquivos de log específicos do Spring Boot
+spring.log
+
+# Arquivos de banco de dados local
+*.h2.db
+*.mv.db
