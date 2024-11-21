@@ -18,6 +18,7 @@ jobs:
             echo "approve=true" >> $GITHUB_ENV
           else
             echo "approve=false" >> $GITHUB_ENV
+          fi
         shell: bash
 
       - name: Approve Pull Request
