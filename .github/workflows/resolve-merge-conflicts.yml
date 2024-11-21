@@ -1,0 +1,42 @@
+name: Resolve Merge Conflicts
+
+on:
+  workflow_run:
+    workflows:
+      - Approve Pull Request
+    types: 
+      [completed]
+
+jobs:
+  resolve-conflicts:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do código
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Configurar a branch prioritária
+      - name: Set Priority Branch
+        run: echo "PRIORITY_BRANCH=feature/database-migration" >> $GITHUB_ENV
+
+      # Resolver conflitos automaticamente
+      - name: Resolve Merge Conflicts
+        run: |
+          echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
+          if git merge --no-commit origin/main; then
+            echo "No conflicts detected. Skipping resolution."
+          else
+            echo "Conflicts detected. Resolving..."
+            for file in $(git diff --name-only --diff-filter=U); do
+              echo "Resolving conflict in: $file"
+              # Mantém as alterações da branch de prioridade
+              awk "/^<<<<<<< $PRIORITY_BRANCH/,/^=======/{if (!/^=======/) print}" "$file" > temp_file && mv temp_file "$file"
+              git add "$file"
+            done
+            git commit -m "Resolved merge conflicts using $PRIORITY_BRANCH strategy"
+          fi
+
+      # Push das mudanças resolvidas
+      - name: Push Resolved Changes
+        run: git push origin HEAD
