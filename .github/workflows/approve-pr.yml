@@ -4,13 +4,24 @@ on:
   pull_request:
       types: [opened, reopened, labeled]
 
+
 jobs:
   approve-pr:
-    if: github.event.pull_request.labels.*.name contains 'ready-to-merge'
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if label matches
+        id: label-check
+        run: |
+          if [[ "${{ github.event.pull_request.labels[*].name }}" == *"ready-to-merge"* ]]; then
+            echo "Label found: ready-to-merge"
+            echo "approve=true" >> $GITHUB_ENV
+          else
+            echo "Label not found"
+            echo "approve=false" >> $GITHUB_ENV
+
       - name: Approve Pull Request
+        if: env.approve == 'true'
         uses: hmarr/auto-approve-action@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
