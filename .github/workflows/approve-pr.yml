@@ -3,7 +3,7 @@ name: Approve Pull Request
 on:
   pull_request:
     types:
-      - labeled # Aciona quando um rótulo é adicionado ao PR
+      [opened, reopened, labeled] # Aciona quando um rótulo é adicionado ao PR
 
 jobs:
   approve-pr:
