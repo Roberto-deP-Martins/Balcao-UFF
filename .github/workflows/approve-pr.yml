@@ -1,0 +1,17 @@
+name: Approve Pull Request
+
+on:
+  pull_request:
+    types:
+      - labeled # Dispara quando um rótulo específico é adicionado ao PR
+
+jobs:
+  approve-pr:
+    if: github.event.pull_request.labels.*.name contains 'ready-to-merge'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Approve Pull Request
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
