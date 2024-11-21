@@ -4,7 +4,6 @@ on:
   pull_request:
       types: [opened, reopened, labeled]
 
-
 jobs:
   approve-pr:
     runs-on: ubuntu-latest
@@ -13,7 +12,8 @@ jobs:
       - name: Check if label matches
         id: label-check
         run: |
-          if [[ "${{ github.event.pull_request.labels[*].name }}" == *"ready-to-merge"* ]]; then
+          echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
+          if echo "${{ toJson(github.event.pull_request.labels) }}" | grep -q '"ready-to-merge"'; then
             echo "Label found: ready-to-merge"
             echo "approve=true" >> $GITHUB_ENV
           else
