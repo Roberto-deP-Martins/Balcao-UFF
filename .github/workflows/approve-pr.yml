@@ -2,7 +2,8 @@ name: Approve Pull Request
 
 on:
   pull_request:
-      types: [opened, reopened, labeled]
+    types:
+      - labeled # Aciona quando um rótulo é adicionado ao PR
 
 jobs:
   approve-pr:
@@ -14,11 +15,10 @@ jobs:
         run: |
           echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
           if echo "${{ toJson(github.event.pull_request.labels) }}" | grep -q '"ready-to-merge"'; then
-            echo "Label found: ready-to-merge"
             echo "approve=true" >> $GITHUB_ENV
           else
-            echo "Label not found"
             echo "approve=false" >> $GITHUB_ENV
+        shell: bash
 
       - name: Approve Pull Request
         if: env.approve == 'true'
