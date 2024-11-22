@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - Approve Pull Request
-    types: 
+    types:
       [completed]
 
 jobs:
@@ -36,6 +36,13 @@ jobs:
             done
             git commit -m "Resolved merge conflicts using $PRIORITY_BRANCH strategy"
           fi
+
+      # Configurar a autenticação com o token
+      - name: Configure Git to Use Token
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
 
       # Push das mudanças resolvidas
       - name: Push Resolved Changes
