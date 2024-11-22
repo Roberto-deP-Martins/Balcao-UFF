@@ -10,14 +10,14 @@
 			"name": "Anuncios",
 			"item": [
 				{
-					"name": "find all",
+					"name": "get all anuncios",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -40,42 +40,14 @@
 					"response": []
 				},
 				{
-					"name": "save",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Venda de Livros\",\n  \"description\": \"Coleção de livros usados em excelente estado.\",\n  \"category\": \"Livros\",\n  \"price\": 150.00,\n  \"contactInfo\": \"contato@example.com\",\n  \"location\": \"Niterói, RJ\",\n  \"userId\": 1\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8080/anuncios/save",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"anuncios",
-								"save"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
+					"name": "save anuncio",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6IjE1NzU5ODQ4NzA4IiwiZXhwIjoxNzMxNTk2OTc1fQ.TwxgFguZWS0kxxdXupXEqcWDNCEWDslYrk4NXn1cZXk",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -84,7 +56,43 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 1,\n    \"title\": \"Venda de Notebook Gamer\",\n    \"description\": \"Notebook Gamer usado, em excelente estado, com 16GB de RAM e SSD de 512GB.\",\n    \"category\": \"Eletrônicos\",\n    \"price\": 4500.00,\n    \"contactInfo\": \"email@example.com\",\n    \"location\": \"Rio de Janeiro, RJ\"\n}\n",
+							"raw": "{\n  \"title\": \"Venda de Livros\",\n  \"description\": \"Coleção de livros usados em excelente estado.\",\n  \"category\": \"Livros\",\n  \"price\": 150.00,\n  \"contactInfo\": \"contato@example.com\",\n  \"location\": \"Niterói, RJ\",\n  \"userId\": 2\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}anuncios/save",
+							"host": [
+								"{{local}}anuncios"
+							],
+							"path": [
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update anuncio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"title\": \"Venda de Notebook Gamer\",\n    \"description\": \"Notebook Gamer usado, em excelente estado, com 16GB de RAM e SSD de 512GB.\",\n    \"category\": \"Eletrônicos\",\n    \"price\": 4500.00,\n    \"contactInfo\": \"email@example.com\",\n    \"location\": \"Rio de Janeiro, RJ\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -102,14 +110,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Usuários",
-			"item": [
+				},
 				{
-					"name": "create",
+					"name": "find by category",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -125,7 +128,74 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"cpf\": \"12345678934\",\n    \"email\": \"roberto6@id.uff.br\",\n    \"name\": \"Rafael\",\n    \"password\": \"1234\",\n    \"role\": \"USER\"\n}",
+							"raw": "{\r\n  \"category\": \"Livros\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}anuncios/category",
+							"host": [
+								"{{local}}anuncios"
+							],
+							"path": [
+								"category"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete anuncio by id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 7\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local}}anuncios/delete",
+							"host": [
+								"{{local}}anuncios"
+							],
+							"path": [
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usuários",
+			"item": [
+				{
+					"name": "create user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"111\",\n    \"email\": \"rerik1@id.uff.br\",\n    \"name\": \"erik\",\n    \"password\": \"111\",\n    \"role\": \"ADMIN\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -164,7 +234,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"cpf\": \"{{cpf}}\",\n    \"password\": \"{{password}}\"\n}",
+							"raw": "{\n    \"cpf\": {{cpf}},\n    \"password\": {{password}}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -191,7 +261,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "{{token}}",
+				"value": "",
 				"type": "string"
 			}
 		]

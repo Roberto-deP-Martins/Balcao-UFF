@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
+import br.uff.balcao_uff.api.dto.request.AnuncioCategoryRequestDTO;
+import br.uff.balcao_uff.api.dto.request.AnuncioDeleteRequestDTO;
 import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,8 +25,8 @@ public interface AnuncioResourceApi {
 	public ResponseEntity<AnuncioResponseDTO> findById(Long id);
 
 	@Operation(summary = "Delete advertisement")
-	public ResponseEntity<Void> delete(Long id);
+	public ResponseEntity<String> delete(AnuncioDeleteRequestDTO id);
 
 	@Operation(summary = "Search advertisements by category")
-	public ResponseEntity<List<AnuncioResponseDTO>> findByCategory(String category);
+	public ResponseEntity<List<AnuncioResponseDTO>> findByCategory(AnuncioCategoryRequestDTO category);
 }
