@@ -1,51 +1,58 @@
-name: Merge PR
+name: Auto Merge Pull Request
 
 on:
+  pull_request:
+    types: [synchronize, opened, reopened, ready_for_review]
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to check and merge'
-        required: true
-        default: 'main'
 
 jobs:
-  merge-pr:
+  auto-merge:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Check Pull Request Status
+      - name: Verify Pull Request Merge Conditions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Checking if PR has the 'ready-to-merge' label..."
-          # Busca PR aberta com a branch main como base (destino)
+          echo "Checking merge conditions for PR..."
+
+          # Obtém o número da pull request
           PR_NUMBER=$(gh pr list --state open --base main --json number -q ".[0].number")
-          
+
           if [[ -z "$PR_NUMBER" ]]; then
-            echo "No open PR found with 'main' as the base branch. Exiting."
+            echo "No open PR found for the specified base branch. Exiting."
             exit 1
           fi
-          
+
           echo "PR Number: $PR_NUMBER"
-          LABELS=$(gh pr view $PR_NUMBER --json labels -q ".labels[].name")
-          echo "Labels: $LABELS"
-          
-          if [[ "$LABELS" != *"ready-to-merge"* ]]; then
-            echo "PR does not have the 'ready-to-merge' label. Exiting."
+
+          # Verifica se todos os checks passaram
+          STATUS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup[].state")
+          echo "Status checks: $STATUS"
+          if [[ "$STATUS" != "SUCCESS" ]]; then
+            echo "Not all checks have passed. Exiting."
             exit 1
           fi
-          
-          echo "PR is ready for merge."
+
+          # Verifica se não há conflitos
+          CONFLICTS=$(gh pr view "$PR_NUMBER" --json mergeable -q ".mergeable")
+          echo "Mergeable: $CONFLICTS"
+          if [[ "$CONFLICTS" != "MERGEABLE" ]]; then
+            echo "PR has conflicts and cannot be merged. Exiting."
+            exit 1
+          fi
+
+          echo "All conditions met for auto-merge."
           echo "merge=true" >> $GITHUB_ENV
 
-      - name: Merge Pull Request
+      - name: Auto Merge Pull Request
         if: env.merge == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Merging PR #$PR_NUMBER..."
-          gh pr merge $PR_NUMBER --merge --delete-branch --repo ${{ github.repository }}
-          echo "PR #$PR_NUMBER merged successfully!"
+          gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }}
+          echo "Pull Request #$PR_NUMBER merged successfully!"
