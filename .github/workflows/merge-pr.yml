@@ -29,13 +29,23 @@ jobs:
 
           echo "PR Number: $PR_NUMBER"
 
-          # Verifica se todos os checks passaram
-          STATUS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup[].state")
-          echo "Status checks: $STATUS"
-          if [[ "$STATUS" != "SUCCESS" ]]; then
-            echo "Not all checks have passed. Exiting."
+          # Verifica se todos os checks passaram (buscando todos os checks e verificando seu status)
+          CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup[].state")
+
+          if [[ -z "$CHECKS" ]]; then
+            echo "No status checks found for the PR. Exiting."
             exit 1
           fi
+
+          echo "Status checks: $CHECKS"
+
+          # Verifica se todos os checks estão com o estado "SUCCESS"
+          for check in $CHECKS; do
+            if [[ "$check" != "SUCCESS" ]]; then
+              echo "Not all checks have passed. Exiting."
+              exit 1
+            fi
+          done
 
           # Verifica se não há conflitos
           CONFLICTS=$(gh pr view "$PR_NUMBER" --json mergeable -q ".mergeable")
