@@ -27,13 +27,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Checking if PR has the 'ready-to-merge' label..."
-          LABELS=$(gh pr view ${{ github.event.workflow_run.head_branch }} --json labels -q ".labels[].name")
+          PR_NUMBER=$(gh pr list --state open --head ${{ github.event.workflow_run.head_branch }} --json number -q ".[0].number")
+
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "No open PR found for branch '${{ github.event.workflow_run.head_branch }}'. Exiting."
+            exit 1
+          fi
+
+          echo "PR Number: $PR_NUMBER"
+          LABELS=$(gh pr view $PR_NUMBER --json labels -q ".labels[].name")
           echo "Labels: $LABELS"
 
           if [[ "$LABELS" != *"ready-to-merge"* ]]; then
             echo "PR does not have the 'ready-to-merge' label. Exiting."
             exit 1
           fi
+
           echo "PR is ready for merge."
           echo "merge=true" >> $GITHUB_ENV
 
@@ -44,4 +53,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Merging the pull request..."
-          gh pr merge ${{ github.event.workflow_run.head_branch }} --merge --repo ${{ github.repository }} --body "Merged automatically by GitHub Actions."
+          gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }} --body "Merged automatically by GitHub Actions."
