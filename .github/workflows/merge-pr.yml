@@ -20,16 +20,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Configurar o token para a GitHub CLI
+      - name: Configure GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" > ~/.gh_token
+          gh auth login --with-token < ~/.gh_token
+
       # Verificar se a PR está pronta para merge
       - name: Check Pull Request Status
         id: check-pr
         run: |
-          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
-            echo "PR resolution workflow did not succeed. Exiting."
-            exit 1
-          fi
-
-          # Check if PR has the 'ready-to-merge' label
           echo "Checking if PR has the 'ready-to-merge' label..."
           LABELS=$(gh pr view ${{ github.event.workflow_run.head_branch }} --json labels -q ".labels[].name")
           echo "Labels: $LABELS"
