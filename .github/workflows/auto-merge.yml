@@ -29,34 +29,26 @@ jobs:
 
           echo "PR Number: $PR_NUMBER"
 
-          # Verifica o status dos checks
-          STATUS_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup")
+          # Função para verificar status dos checks
+          check_status() {
+            STATUS_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup")
+            echo "Status checks (raw): $STATUS_CHECKS"
+            STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
+            echo "Status check states: $STATUS_CHECK_STATES"
+          }
 
-          echo "Status checks (raw): $STATUS_CHECKS"
+          # Aguarda até que todos os checks estejam concluídos
+          check_status
+          while echo "$STATUS_CHECK_STATES" | grep -q "IN_PROGRESS"; do
+            echo "Waiting for status checks to complete..."
+            sleep 10  # Aguarda 10 segundos antes de verificar novamente
+            check_status
+          done
 
-          if [[ -z "$STATUS_CHECKS" ]]; then
-            echo "No status checks found for the PR. Exiting."
+          if echo "$STATUS_CHECK_STATES" | grep -qv "SUCCESS"; then
+            echo "Not all checks have passed. Exiting."
             exit 1
           fi
-
-          STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
-          echo "Status check states: $STATUS_CHECK_STATES"
-
-          # Espera até que todos os checks estejam concluídos e bem-sucedidos
-          for check in $STATUS_CHECK_STATES; do
-            while [[ "$check" == "IN_PROGRESS" ]]; do
-              echo "Waiting for status checks to complete..."
-              sleep 10  # Aguarda 10 segundos antes de verificar novamente
-              STATUS_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup")
-              STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
-              echo "Status check states (update): $STATUS_CHECK_STATES"
-            done
-
-            if [[ "$check" != "SUCCESS" ]]; then
-              echo "Not all checks have passed. Exiting."
-              exit 1
-            fi
-          done
 
           # Verifica se não há conflitos
           CONFLICTS=$(gh pr view "$PR_NUMBER" --json mergeable -q ".mergeable")
