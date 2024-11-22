@@ -42,8 +42,15 @@ jobs:
           STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
           echo "Status check states: $STATUS_CHECK_STATES"
 
-          # Verifica se todos os checks estão com o estado "SUCCESS"
+          # Espera até que todos os checks estejam concluídos e bem-sucedidos
           for check in $STATUS_CHECK_STATES; do
+            while [[ "$check" == "IN_PROGRESS" ]]; do
+              echo "Waiting for status checks to complete..."
+              sleep 10  # Aguarda 10 segundos antes de verificar novamente
+              STATUS_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup")
+              STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
+            done
+
             if [[ "$check" != "SUCCESS" ]]; then
               echo "Not all checks have passed. Exiting."
               exit 1
