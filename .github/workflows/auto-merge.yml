@@ -49,6 +49,7 @@ jobs:
               sleep 10  # Aguarda 10 segundos antes de verificar novamente
               STATUS_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q ".statusCheckRollup")
               STATUS_CHECK_STATES=$(echo $STATUS_CHECKS | jq -r '.[].state')
+              echo "Status check states (update): $STATUS_CHECK_STATES"
             done
 
             if [[ "$check" != "SUCCESS" ]]; then
