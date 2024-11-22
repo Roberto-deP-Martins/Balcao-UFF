@@ -1,0 +1,49 @@
+name: Merge Pull Request
+
+on:
+  workflow_run:
+    workflows:
+      - Resolve Merge Conflicts
+    types:
+      [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do repositório
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Verificar se a PR está pronta para merge
+      - name: Check Pull Request Status
+        id: check-pr
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "PR resolution workflow did not succeed. Exiting."
+            exit 1
+          fi
+
+          # Check if PR has the 'ready-to-merge' label
+          echo "Checking if PR has the 'ready-to-merge' label..."
+          LABELS=$(gh pr view ${{ github.event.workflow_run.head_branch }} --json labels -q ".labels[].name")
+          echo "Labels: $LABELS"
+
+          if [[ "$LABELS" != *"ready-to-merge"* ]]; then
+            echo "PR does not have the 'ready-to-merge' label. Exiting."
+            exit 1
+          fi
+          echo "PR is ready for merge."
+          echo "merge=true" >> $GITHUB_ENV
+
+      # Fazer o merge da Pull Request
+      - name: Merge Pull Request
+        if: env.merge == 'true'
+        run: |
+          echo "Merging the pull request..."
+          gh pr merge ${{ github.event.workflow_run.head_branch }} --merge --repo ${{ github.repository }} --body "Merged automatically by GitHub Actions."
