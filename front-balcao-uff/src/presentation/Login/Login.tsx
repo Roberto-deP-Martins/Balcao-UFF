@@ -55,8 +55,8 @@ const Login = () => {
       .then((res) => res.json())
       .then((data) => {
         localStorage.setItem('token', data.token);
-        alert('Login bem-sucedido com Google!');
-        navigate('/');
+        console.log('Login bem-sucedido com Google!');
+        navigate('/advertises');
       })
       .catch((error) => console.error('Erro ao autenticar com Google:', error));
   };
