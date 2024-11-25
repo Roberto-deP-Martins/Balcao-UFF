@@ -13,8 +13,12 @@ public interface AnuncioRepository extends JpaRepository<AnuncioEntity, Long> {
 	static final String FIND_BY_CATEGORY = "SELECT * "
 											+ " FROM tb_anuncio ta "
 											+ "	WHERE LOWER(ta.category) "
-											+ "	LIKE LOWER(:category)";
+											+ "	LIKE LOWER(:category)"
+											+ " ORDER BY ta.id DESC";
 
 	@Query(value = FIND_BY_CATEGORY, nativeQuery = true)
 	List<AnuncioEntity> findByCategory(@Param("category")String category);
+	
+	@Query("SELECT a FROM AnuncioEntity a ORDER BY a.id DESC") 
+	List<AnuncioEntity> findAllByOrderByIdDesc();
 }

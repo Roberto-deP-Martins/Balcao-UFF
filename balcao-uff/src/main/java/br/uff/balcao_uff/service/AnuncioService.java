@@ -1,27 +1,42 @@
 package br.uff.balcao_uff.service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import br.uff.balcao_uff.entity.AnuncioEntity;
+import br.uff.balcao_uff.entity.AnuncioImageEntity;
 import br.uff.balcao_uff.entity.UserEntity;
+import br.uff.balcao_uff.repository.AnuncioImageRepository;
 import br.uff.balcao_uff.repository.AnuncioRepository;
 import br.uff.balcao_uff.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class AnuncioService {
 
     private final AnuncioRepository anuncioRepository;
+    private final AnuncioImageRepository anuncioImageRepository;
     private final UserRepository userRepository;
+    
+    @Value("${app.caminhoImagem}") 
+    private String caminhoImagem;
+    
 
-    @Transactional
+
+	@Transactional
     public AnuncioResponseDTO save(AnuncioRequestDTO anuncioRequestDTO) {
         UserEntity user = userRepository.findById(anuncioRequestDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -57,11 +72,12 @@ public class AnuncioService {
     }
 
     public List<AnuncioResponseDTO> findAll() {
-        List<AnuncioEntity> anuncios = anuncioRepository.findAll();
+        List<AnuncioEntity> anuncios = anuncioRepository.findAllByOrderByIdDesc();
         return anuncios.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
     
     public List<AnuncioResponseDTO> findByCategory(String category){
     	
@@ -83,6 +99,12 @@ public class AnuncioService {
      * @return
      */
     private AnuncioResponseDTO convertToDto(AnuncioEntity anuncioEntity) {
+        List<String> imagePaths = anuncioEntity.getImages() != null
+                ? anuncioEntity.getImages().stream()
+                    .map(AnuncioImageEntity::getImagePath)
+                    .collect(Collectors.toList())
+                : Collections.emptyList();
+
         return AnuncioResponseDTO.builder()
                 .id(anuncioEntity.getId())
                 .title(anuncioEntity.getTitle())
@@ -91,7 +113,63 @@ public class AnuncioService {
                 .price(anuncioEntity.getPrice())
                 .contactInfo(anuncioEntity.getContactInfo())
                 .location(anuncioEntity.getLocation())
-                .userId(anuncioEntity.getUser() != null ? anuncioEntity.getUser().getId() : null)
+                .userId(anuncioEntity.getUser().getId())
+                .imagePaths(imagePaths)
                 .build();
     }
+
+
+    
+    
+    @Transactional
+    public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, List<MultipartFile> images) {
+        UserEntity user = userRepository.findById(anuncioRequestDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // Criação do anúncio
+        AnuncioEntity anuncioEntity = AnuncioEntity.builder()
+                .title(anuncioRequestDTO.getTitle())
+                .description(anuncioRequestDTO.getDescription())
+                .category(anuncioRequestDTO.getCategory())
+                .price(anuncioRequestDTO.getPrice())
+                .contactInfo(anuncioRequestDTO.getContactInfo())
+                .location(anuncioRequestDTO.getLocation())
+                .user(user)
+                .build();
+
+        // Salvando o anúncio no banco
+        AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
+
+        // Salvando as imagens associadas
+        if (images != null) {
+            images.forEach(image -> {
+                try {
+                    // Gera um nome único e salva a imagem
+                    String uniqueID = UUID.randomUUID().toString();
+                    Path caminho = Paths.get(caminhoImagem + uniqueID + "_" + image.getOriginalFilename());
+                    Files.write(caminho, image.getBytes());
+
+                    // Cria a entidade AnuncioImageEntity
+                    AnuncioImageEntity imageEntity = AnuncioImageEntity.builder()
+                            .imagePath(caminho.toString())
+                            .anuncio(savedAnuncio)
+                            .build();
+
+                    // Salva a imagem no repositório
+                    anuncioImageRepository.save(imageEntity);
+                } catch (Exception e) {
+                    throw new RuntimeException("Erro ao salvar imagem: " + e.getMessage());
+                }
+            });
+        }
+
+        // Recarrega o anúncio com as imagens associadas
+        AnuncioEntity anuncioWithImages = anuncioRepository.findById(savedAnuncio.getId())
+                .orElseThrow(() -> new RuntimeException("Erro ao carregar o anúncio salvo"));
+
+        // Converte para DTO e retorna
+        return convertToDto(anuncioWithImages);
+    }
+
+
 }

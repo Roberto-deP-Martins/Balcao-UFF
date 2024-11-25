@@ -4,13 +4,18 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.uff.balcao_uff.api.dto.request.AnuncioCategoryRequestDTO;
 import br.uff.balcao_uff.api.dto.request.AnuncioDeleteRequestDTO;
@@ -39,6 +44,28 @@ public class AnuncioResource implements AnuncioResourceApi {
 		AnuncioResponseDTO savedAnuncio = service.save(anuncioRequestDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
 	}
+
+	@PostMapping(value = "/save2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<AnuncioResponseDTO> save2(
+	        @RequestPart("anuncio") String anuncioJson, // JSON como String
+	        @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+	    try {
+	        // Converte o JSON recebido para um objeto Java
+	        ObjectMapper objectMapper = new ObjectMapper();
+	        AnuncioRequestDTO anuncioRequestDTO = objectMapper.readValue(anuncioJson, AnuncioRequestDTO.class);
+
+	        if (images != null && images.size() > 3) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+	        }
+
+	        AnuncioResponseDTO savedAnuncio = service.saveWithImages(anuncioRequestDTO, images);
+	        return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
+
 
 	@PostMapping("/update")
 	public ResponseEntity<String> update(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
@@ -81,7 +108,7 @@ public class AnuncioResource implements AnuncioResourceApi {
 	@PostMapping("/category")
 	public ResponseEntity<List<AnuncioResponseDTO>> findByCategory(
 			@RequestBody AnuncioCategoryRequestDTO categoryRequest) {
-		
+
 		List<AnuncioResponseDTO> anuncios = service.findByCategory(categoryRequest.category());
 		return ResponseEntity.ok(anuncios);
 	}

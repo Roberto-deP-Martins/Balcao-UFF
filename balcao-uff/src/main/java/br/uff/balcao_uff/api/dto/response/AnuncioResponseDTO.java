@@ -1,5 +1,7 @@
 package br.uff.balcao_uff.api.dto.response;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +23,5 @@ public class AnuncioResponseDTO {
 	private String contactInfo;
 	private String location;
 	private Long userId;
+	private List<String> imagePaths;
 }

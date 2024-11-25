@@ -38,6 +38,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/anuncios/category").authenticated()
                         .requestMatchers(HttpMethod.POST, "/anuncios/delete").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/auth/google-login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/anuncioImages/image/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
