@@ -1,6 +1,7 @@
 package br.uff.balcao_uff.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +56,14 @@ public class AnuncioEntity implements Serializable {
 
 	@JsonProperty(value = "location")
 	private String location;
+	
+	@Column(name="dt_criacao")
+	private Date dtCriacao;
+	
+	@PrePersist
+	protected void onCreate() {
+		this.dtCriacao = new Date();
+	}
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
