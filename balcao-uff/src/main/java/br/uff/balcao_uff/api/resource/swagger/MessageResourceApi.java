@@ -10,12 +10,15 @@ import io.swagger.v3.oas.annotations.Operation;
 
 public interface MessageResourceApi {
 
-	@Operation(summary = "Send a message")
-	public ResponseEntity<MessageResponseDTO> sendMessage(MessageRequestDTO messageRequestDTO);
+    @Operation(summary = "Create a new message")
+    public ResponseEntity<MessageResponseDTO> save(MessageRequestDTO messageRequestDTO);
 
-	@Operation(summary = "Get all messages for a user")
-	public ResponseEntity<List<MessageResponseDTO>> getMessages(Long userId);
+    @Operation(summary = "Get all messages in a conversation")
+    public ResponseEntity<List<MessageResponseDTO>> findByConversaId(Long conversaId);
 
-	@Operation(summary = "Get a specific message by ID")
-	public ResponseEntity<MessageResponseDTO> getMessage(Long messageId);
+    @Operation(summary = "Get message by ID")
+    public ResponseEntity<MessageResponseDTO> findById(Long id);
+
+    @Operation(summary = "Delete message by ID")
+    public ResponseEntity<String> delete(Long id);
 }
