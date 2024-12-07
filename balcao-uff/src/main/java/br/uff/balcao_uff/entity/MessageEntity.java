@@ -41,12 +41,12 @@ public class MessageEntity implements Serializable {
     private ConversaEntity conversa;
 
     @Column(name = "dt_envio", nullable = false)
-    private Date dtEnvio;
+    private Date dt_Envio;
 
     @PrePersist
     protected void onSend() {
-        if (this.dtEnvio == null) {
-            this.dtEnvio = new Date();
+        if (this.dt_Envio == null) {
+            this.dt_Envio = new Date();
         }
     }
 }

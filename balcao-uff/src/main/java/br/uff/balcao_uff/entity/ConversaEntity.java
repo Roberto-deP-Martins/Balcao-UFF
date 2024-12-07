@@ -1,7 +1,10 @@
 package br.uff.balcao_uff.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +34,9 @@ public class ConversaEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @JsonProperty(value="data_criacao")
+    private LocalDateTime data_criacao;
 
     @ManyToOne
     @JoinColumn(name = "anuncio_id", referencedColumnName = "id", nullable = false)
