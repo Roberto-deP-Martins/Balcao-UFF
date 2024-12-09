@@ -11,15 +11,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 1996
+          POSTGRES_DB: balcao_anuncios_uff
+        options: > 
+          --health-cmd "pg_isready -U postgres" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
 
     steps:
-    # Clona o repositório
+    # Configura o repositório
     - name: Checkout code
       uses: actions/checkout@v3
-
-    # Lista os arquivos no repositório para verificar a estrutura
-    - name: List repository contents
-      run: ls -l
 
     # Configura o Java JDK
     - name: Set up JDK 17
@@ -27,13 +37,17 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
-        cache: 'maven'
+        cache: 'maven' # Habilita cache para dependências Maven
 
-    # Navega até o diretório do projeto e compila o código
-    - name: Build with Maven
+    # Aguarda o banco de dados inicializar
+    - name: Wait for Postgres
       run: |
-        cd balcao-uff
-        mvn clean install -DskipTests=false
+        echo "Aguardando inicialização do banco de dados..."
+        sleep 20
+
+    # Instala as dependências e executa os testes
+    - name: Build with Maven
+      run: mvn clean install -DskipTests=false
 
     # Publica relatórios de teste (se existirem)
     - name: Publish Test Results
@@ -41,11 +55,9 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: balcao-uff/target/surefire-reports/
+        path: target/surefire-reports/
 
     # Executa a aplicação (opcional)
     - name: Run Application
       if: ${{ github.event_name == 'push' }}
-      run: |
-        cd balcao-uff
-        mvn spring-boot:run
+      run: mvn spring-boot:run
