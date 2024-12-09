@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Navigate to project directory
-      run: cd balcao-uff
-
-    
-    # Configura o repositório
+    # Clona o repositório
     - name: Checkout code
       uses: actions/checkout@v3
+
+    # Lista os arquivos no repositório para verificar a estrutura
+    - name: List repository contents
+      run: ls -l
 
     # Configura o Java JDK
     - name: Set up JDK 17
@@ -27,11 +27,13 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
-        cache: 'maven' # Habilita cache para dependências Maven
+        cache: 'maven'
 
-    # Instala as dependências e executa os testes
+    # Navega até o diretório do projeto e compila o código
     - name: Build with Maven
-      run: mvn clean install -DskipTests=false
+      run: |
+        cd balcao-uff
+        mvn clean install -DskipTests=false
 
     # Publica relatórios de teste (se existirem)
     - name: Publish Test Results
@@ -39,9 +41,11 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: target/surefire-reports/
+        path: balcao-uff/target/surefire-reports/
 
     # Executa a aplicação (opcional)
     - name: Run Application
       if: ${{ github.event_name == 'push' }}
-      run: mvn spring-boot:run
+      run: |
+        cd balcao-uff
+        mvn spring-boot:run
