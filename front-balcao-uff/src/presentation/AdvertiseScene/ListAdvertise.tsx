@@ -10,7 +10,6 @@ const ListAdvertise = () => {
   const [price, setPrice] = useState<number | "">("");
   const [contactInfo, setContactInfo] = useState<string>("");
   const [location, setLocation] = useState<string>("");
-  const [userId, setUserId] = useState<number | "">("");
   const [image1, setImage1] = useState<File | null>(null);
   const [image2, setImage2] = useState<File | null>(null);
   const [image3, setImage3] = useState<File | null>(null);
@@ -85,14 +84,14 @@ const ListAdvertise = () => {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
+  
     if (!image1 || !image2 || !image3) {
       setError("Por favor, envie exatamente 3 imagens.");
       return;
     }
-
+  
     const token = localStorage.getItem("token");
-
+  
     const newAd = {
       title,
       description,
@@ -100,15 +99,14 @@ const ListAdvertise = () => {
       price: Number(price),
       contactInfo,
       location,
-      userId: Number(userId),
     };
-
+  
     const formData = new FormData();
     formData.append("anuncio", JSON.stringify(newAd));
     formData.append("images", image1);
     formData.append("images", image2);
     formData.append("images", image3);
-
+  
     try {
       const response = await fetch("http://localhost:8080/anuncios/save2", {
         method: "POST",
@@ -117,7 +115,7 @@ const ListAdvertise = () => {
         },
         body: formData,
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         setError(
@@ -127,17 +125,16 @@ const ListAdvertise = () => {
         );
         return;
       }
-
+  
       const data = await response.json();
       console.log("Anúncio salvo com sucesso:", data);
-
+  
       setTitle("");
       setDescription("");
       setCategory("");
       setPrice("");
       setContactInfo("");
       setLocation("");
-      setUserId("");
       setImage1(null);
       setImage2(null);
       setImage3(null);
@@ -147,6 +144,7 @@ const ListAdvertise = () => {
       console.error("Erro ao salvar anúncio:", error);
     }
   };
+  
 
   return (
     <div className="w-screen h-full">
@@ -250,15 +248,6 @@ const ListAdvertise = () => {
             placeholder="Localização"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-          <input
-            type="number"
-            placeholder="ID do Usuário"
-            value={userId}
-            onChange={(e) =>
-              setUserId(e.target.value ? parseInt(e.target.value) : "")
-            }
             className="w-full p-2 border border-gray-300 rounded"
           />
           <input
