@@ -20,6 +20,31 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1080697336488-5ufvcf9p11nvem01u8d9glmg8s98iab4.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Google
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: id
+
+  api:
+    security:
+      token:
+        secret: ${JWT.SECRET:my-secret-key}  # Defina sua chave secreta para JWT
+
 server:
   port: 8080
   error:
@@ -36,8 +61,6 @@ logging:
         type:
           descriptor:
             sql: TRACE
+app:
+  caminhoImagem: src/main/resources/uploads/images/
 
-#api:
-#  security:
-#    token:
-#      secret: ${JWT.SECRET:my-secret-key}

@@ -1,21 +1,13 @@
 package br.uff.balcao_uff.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Getter
@@ -26,27 +18,35 @@ import lombok.Setter;
 @Table(name = "tb_message")
 public class MessageEntity implements Serializable {
 
-	private static final long serialVersionUID = -2369341048098582768L;
+    private static final long serialVersionUID = -2369341048098582768L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@JsonProperty(value = "content")
-	private String content;
-	
-	@JsonProperty(value = "isRead")
-	private boolean isRead;
+    @JsonProperty(value = "content")
+    @Column(nullable = false)
+    private String content;
 
-	@ManyToOne
-	@JoinColumn(name = "sender_id", referencedColumnName = "id")
-	private UserEntity sender;
+    @JsonProperty(value = "isRead")
+    @Column(nullable = false)
+    private boolean isRead = false;
 
-	@ManyToOne
-	@JoinColumn(name = "receiver_id", referencedColumnName = "id")
-	private UserEntity receiver;
+    @ManyToOne
+    @JoinColumn(name = "sender_id", referencedColumnName = "id", nullable = false)
+    private UserEntity sender;
 
-	@ManyToOne
-	@JoinColumn(name = "anuncio_id", referencedColumnName = "id")
-	private AnuncioEntity anuncio;
+    @ManyToOne
+    @JoinColumn(name = "conversa_id", referencedColumnName = "id", nullable = false)
+    private ConversaEntity conversa;
+
+    @Column(name = "dt_envio", nullable = false)
+    private Date dt_Envio;
+
+    @PrePersist
+    protected void onSend() {
+        if (this.dt_Envio == null) {
+            this.dt_Envio = new Date();
+        }
+    }
 }

@@ -11,9 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageRequestDTO {
+public class AnuncioPesquisaAvancadaRequestDTO {
 
-	private Long conversaId;
-    private String content;
-    private Long senderId;
+	private String nome;
+	private String category;
+	private String ordemPreco;
+	private String ordemData;
+	
 }

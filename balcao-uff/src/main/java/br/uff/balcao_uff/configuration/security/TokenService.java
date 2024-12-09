@@ -21,14 +21,20 @@ public class TokenService {
     private String secret;
 
     /**
-     * Gera um token JWT para o usuário fornecido.
+     * Gera um token JWT para o usuário fornecido. O subject pode ser o e-mail
+     * (para autenticação via Google) ou o CPF (para autenticação via CPF e senha).
      */
     public String generateToken(UserEntity user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+            
+            // Verifica se o usuário tem um e-mail (significa que é um login via Google)
+            String subject = (user.getEmail() != null) ? user.getEmail() : user.getCpf();
+            
             return JWT.create()
                     .withIssuer("auth-api")
-                    .withSubject(user.getCpf())
+                    .withSubject(subject)  // Usando email ou CPF como subject
+                    .withClaim("role", user.getRole().name()) // Adiciona a role no token
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
@@ -37,7 +43,9 @@ public class TokenService {
     }
 
     /**
-     * Valida o token JWT e retorna o CPF (subject) se for válido.
+     * Valida o token JWT e retorna o CPF ou e-mail (subject) se for válido.
+     * O subject será utilizado para determinar se o login foi feito via Google (e-mail)
+     * ou via CPF.
      */
     public String validateToken(String token) {
         try {
