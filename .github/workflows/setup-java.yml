@@ -14,7 +14,8 @@ jobs:
 
     steps:
     - name: Navigate to project directory
-      run: cd balcao-uff/pom.xml
+      run: cd balcao-uff
+
     
     # Configura o repositório
     - name: Checkout code
