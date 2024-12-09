@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Navigate to project directory
+      run: cd balcao-uff/pom.xml
+    
     # Configura o repositório
     - name: Checkout code
       uses: actions/checkout@v3
