@@ -20,11 +20,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 1996
           POSTGRES_DB: balcao_anuncios_uff
-        options: > 
-          --health-cmd "pg_isready -U postgres" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
 
     steps:
     # Configura o repositório
@@ -43,7 +38,14 @@ jobs:
     - name: Wait for Postgres
       run: |
         echo "Aguardando inicialização do banco de dados..."
-        sleep 20
+        for i in {1..10}; do
+          if pg_isready -h localhost -p 5432 -U postgres; then
+            echo "Banco de dados está pronto!"
+            break
+          fi
+          echo "Aguardando o banco de dados... Tentativa $i"
+          sleep 5
+        done
 
     # Instala as dependências e executa os testes
     - name: Build with Maven
@@ -57,7 +59,7 @@ jobs:
         name: test-results
         path: target/surefire-reports/
 
-    # Executa a aplicação (opcional)
+    # Executa a aplicação 
     - name: Run Application
       if: ${{ github.event_name == 'push' }}
       run: mvn spring-boot:run
