@@ -21,15 +21,18 @@ const AdvertiseView = () => {
         <div className="rounded-lg shadow-lg overflow-hidden">
           {ad.imagePaths && ad.imagePaths.length > 0 ? (
             <Carousel showThumbs={false} infiniteLoop showStatus={false} className="rounded-lg">
-              {ad.imagePaths.map((path: string, index: number) => (
-                <div key={index}>
-                  <img
-                    src={`http://localhost:8080/anuncioImages/image/${path.split("\\").pop()}`}
-                    alt={`Imagem ${index + 1}`}
-                    className="w-full object-cover rounded-lg"
-                  />
-                </div>
-              ))}
+              {ad.imagePaths.map((path: string, index: number) => {
+                const fileName = path.substring(path.lastIndexOf('/') + 1);
+                return (
+                  <div key={index}>
+                    <img
+                      src={`http://localhost:8080/anuncioImages/image/${fileName}`}
+                      alt={`Imagem ${index + 1}`}
+                      className="w-full object-cover rounded-lg"
+                    />
+                  </div>
+                );
+              })}
             </Carousel>
           ) : (
             <div className="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
