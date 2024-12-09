@@ -49,10 +49,9 @@ public class AnuncioResource implements AnuncioResourceApi {
 	}
 
 	@PostMapping(value = "/save2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<AnuncioResponseDTO> save2(@RequestPart("anuncio") String anuncioJson,
+	public ResponseEntity<AnuncioResponseDTO> save3(@RequestPart("anuncio") String anuncioJson,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images) {
 		try {
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			AnuncioRequestDTO anuncioRequestDTO = objectMapper.readValue(anuncioJson, AnuncioRequestDTO.class);
 
@@ -60,7 +59,7 @@ public class AnuncioResource implements AnuncioResourceApi {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 			}
 
-			AnuncioResponseDTO savedAnuncio = service.saveWithImages(anuncioRequestDTO, images);
+			AnuncioResponseDTO savedAnuncio = service.saveWithImages2(anuncioRequestDTO, images);
 			return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -115,8 +114,10 @@ public class AnuncioResource implements AnuncioResourceApi {
 	}
 
 	@PostMapping("/busca-avancada")
-	public ResponseEntity<List<AnuncioResponseDTO>>buscaAvancada(@RequestParam AnuncioPesquisaAvancadaRequestDTO request){
+	public ResponseEntity<List<AnuncioResponseDTO>> buscaAvancada(
+			@RequestParam AnuncioPesquisaAvancadaRequestDTO request) {
 		List<AnuncioResponseDTO> anuncioDto = new ArrayList<>();
 		return ResponseEntity.ok(anuncioDto);
 	}
+
 }
