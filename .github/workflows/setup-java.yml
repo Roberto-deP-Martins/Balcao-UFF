@@ -47,13 +47,11 @@ jobs:
           sleep 5
         done
 
-    # Navega para o subdiretório do projeto
-    - name: Navigate to project directory
-      working-directory: balcao-uff
-
-    # Instala as dependências e executa os testes
+    # Navega até o diretório do projeto e compila o código
     - name: Build with Maven
-      run: mvn clean install -DskipTests=false
+      run: |
+        cd balcao-uff
+        mvn clean install -DskipTests=false
 
     # Publica relatórios de teste (se existirem)
     - name: Publish Test Results
@@ -66,5 +64,6 @@ jobs:
     # Executa a aplicação (opcional)
     - name: Run Application
       if: ${{ github.event_name == 'push' }}
-      working-directory: balcao-uff
-      run: mvn spring-boot:run
+      run: |
+        cd balcao-uff
+        mvn spring-boot:run
