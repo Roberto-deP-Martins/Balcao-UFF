@@ -47,6 +47,10 @@ jobs:
           sleep 5
         done
 
+    # Navega para o subdiretório do projeto
+    - name: Navigate to project directory
+      working-directory: balcao-uff
+
     # Instala as dependências e executa os testes
     - name: Build with Maven
       run: mvn clean install -DskipTests=false
@@ -57,9 +61,10 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: target/surefire-reports/
+        path: balcao-uff/target/surefire-reports/
 
-    # Executa a aplicação 
+    # Executa a aplicação (opcional)
     - name: Run Application
       if: ${{ github.event_name == 'push' }}
+      working-directory: balcao-uff
       run: mvn spring-boot:run
