@@ -4,12 +4,11 @@ import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 const AdvertiseView = () => {
-  // Mock para dados de exemplo
   const location = useLocation();
   const ad = location.state?.ad;
-  const { userId, id } = ad || {}; // Ajustado para evitar erros se `ad` for indefinido
+  const { userId, id } = ad || {};
 
-  const [isNormalUser, setIsNormalUser] = useState(); // Alterar para `true` ou `false` para testar os dois casos
+  const [isNormalUser, setIsNormalUser] = useState();
   const [isWriting, setIsWriting] = useState(false); 
   const [comment, setComment] = useState('');
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -145,7 +144,6 @@ const AdvertiseView = () => {
     verify()
   },[isNormalUser])
 
-  // Função para enviar comentário
   const handleCommentSubmit = async () => {
     await continuaConversa(comment)
     await getChats(true)
@@ -161,7 +159,6 @@ const AdvertiseView = () => {
     setIsWriting(false);
   };
 
-  // Renderizar lista de conversas (anunciante)
   const renderConversationList = () => (
     listConversation.length == 0 ?  <p className="text-gray-500">Ninguém comentou no seu anúncio</p>  : 
     <div className="space-y-4">
