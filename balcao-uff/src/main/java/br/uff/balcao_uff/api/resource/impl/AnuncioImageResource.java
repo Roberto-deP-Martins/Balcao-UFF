@@ -3,6 +3,7 @@ package br.uff.balcao_uff.api.resource.impl;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/anuncioImages")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
+@Tag(name = "Imagens", description = "Gerenciamento de imagens")
 public class AnuncioImageResource {
 
 	@Autowired
