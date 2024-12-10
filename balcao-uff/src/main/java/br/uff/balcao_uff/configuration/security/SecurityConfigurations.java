@@ -40,6 +40,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/auth/google-login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/messages/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/anuncioImages/image/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/current-user").authenticated()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
