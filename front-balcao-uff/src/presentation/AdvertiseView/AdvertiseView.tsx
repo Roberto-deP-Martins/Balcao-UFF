@@ -71,7 +71,7 @@ const AdvertiseView = () => {
     try {
       const token = localStorage.getItem("token");
       console.log(selectedConversation.id)
-      const response = await fetch(`http://localhost:8080/conversas/sendmessage`, {
+      const response = await fetch(`http://localhost:8080/messages/sendmessage`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
