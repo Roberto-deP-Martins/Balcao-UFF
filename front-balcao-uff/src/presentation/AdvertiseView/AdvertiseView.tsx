@@ -9,16 +9,16 @@ const AdvertiseView = () => {
   const ad = location.state?.ad;
   const { userId, id } = ad || {}; // Ajustado para evitar erros se `ad` for indefinido
 
-  const [isNormalUser] = useState(true); // Alterar para `true` ou `false` para testar os dois casos
+  const [isNormalUser, setIsNormalUser] = useState(); // Alterar para `true` ou `false` para testar os dois casos
   const [isWriting, setIsWriting] = useState(false); 
   const [comment, setComment] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState(null); 
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [indexSelectedConversation, setIndexSelected] = useState(0)
   const [listConversation, setListConversation] = useState([])
 
   const getConversas = async () => {
     try {
       const token = localStorage.getItem("token");
-      console.log("token", token)
       const response = await fetch(`http://localhost:8080/conversas/por-anuncio/${id}`, {
         method: "GET",
         headers: {
@@ -32,7 +32,28 @@ const AdvertiseView = () => {
       }
 
       const data = await response.json();
-      console.log(data)
+      return data
+    } catch (error) {
+      console.error("Erro ao buscar AGASDADHASD:", error);
+    }
+  }
+
+  const getUserLogged = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8080/auth/current-user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+
+      const data = await response.json();
       return data
     } catch (error) {
       console.error("Erro ao buscar AGASDADHASD:", error);
@@ -42,7 +63,6 @@ const AdvertiseView = () => {
   const initConversa = async (mensagem: unknown) => {
     try {
       const token = localStorage.getItem("token");
-      console.log(mensagem)
       const response = await fetch(`http://localhost:8080/conversas/iniciar-conversa`, {
         method: "POST",
         headers: {
@@ -60,7 +80,6 @@ const AdvertiseView = () => {
       }
 
       const data = await response.json();
-      console.log(data)
       return data
     } catch (error) {
       console.error("Erro ao buscar anúncios:", error);
@@ -70,7 +89,6 @@ const AdvertiseView = () => {
   const continuaConversa = async (mensagem: unknown) => {
     try {
       const token = localStorage.getItem("token");
-      console.log(selectedConversation.id)
       const response = await fetch(`http://localhost:8080/messages/sendmessage`, {
         method: "POST",
         headers: {
@@ -95,33 +113,46 @@ const AdvertiseView = () => {
   };
   
 
-  const getChats = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getChats = async (notInit = false) => {
     const result = await getConversas() 
     setListConversation(result)
     if(result.length > 0 && isNormalUser){
       setSelectedConversation(result[0])
+      setIndexSelected(0)
     }
+    if(!isNormalUser && notInit){
+      setSelectedConversation(result[indexSelectedConversation])
+    }
+  }
+
+  const funcVerifyUser = async () => {
+    const result = await getUserLogged()
+    setIsNormalUser(userId !== result.id)
   }
 
   useEffect(() => {
     async function init() {
-     await getChats()
+     await funcVerifyUser() 
     }
     init()
   },[])
 
-  // Função para enviar comentário
-  const handleCommentSubmit = async () => {
-    console.log("Comentário enviado:", comment);
-    const result = await continuaConversa(comment)
-    if(result?.conversaId){
+  useEffect(() => {
+    async function verify() {
       await getChats()
     }
+    verify()
+  },[isNormalUser])
+
+  // Função para enviar comentário
+  const handleCommentSubmit = async () => {
+    await continuaConversa(comment)
+    await getChats(true)
     setComment('');
     setIsWriting(false);
   };
   const handleCommentSubmitInit = async () => {
-    console.log("Comentário enviado:", comment);
     const result = await initConversa(comment)
     if(result?.conversaId){
       await getChats()
@@ -134,7 +165,7 @@ const AdvertiseView = () => {
   const renderConversationList = () => (
     listConversation.length == 0 ?  <p className="text-gray-500">Ninguém comentou no seu anúncio</p>  : 
     <div className="space-y-4">
-      {listConversation.map((conversa) => (
+      {listConversation.map((conversa, index) => (
         <div key={conversa.id} className="bg-gray-100 p-3 rounded-lg shadow-md">
           <h3 className="text-gray-700 font-semibold mb-2">Conversa {conversa.id}</h3>
           <div className="space-y-2">
@@ -156,7 +187,7 @@ const AdvertiseView = () => {
           </div>
           <button
             className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
-            onClick={() => setSelectedConversation(conversa)}
+            onClick={() => {setSelectedConversation(conversa); setIndexSelected(index)}}
           >
             Visualizar Conversa
           </button>
@@ -173,7 +204,7 @@ const AdvertiseView = () => {
       {!isNormalUser &&
         <button
           className="mb-4 bg-gray-300 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-400 transition"
-          onClick={() => setSelectedConversation(null)}
+          onClick={() => {setSelectedConversation(null); setIndexSelected(0)}}
         >
           Voltar
         </button>
