@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public interface MessageResourceApi {
 
     @Operation(summary = "Create a new message")
-    public ResponseEntity<MessageResponseDTO> save(MessageRequestDTO messageRequestDTO);
+    public ResponseEntity<MessageResponseDTO> sendMessage(MessageRequestDTO messageRequestDTO);
 
     @Operation(summary = "Get all messages in a conversation")
     public ResponseEntity<List<MessageResponseDTO>> findByConversaId(Long conversaId);

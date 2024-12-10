@@ -15,5 +15,4 @@ public class MessageRequestDTO {
 
 	private Long conversaId;
     private String content;
-    private Long senderId;
 }
