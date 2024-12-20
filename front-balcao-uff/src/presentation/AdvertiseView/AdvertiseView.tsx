@@ -1,19 +1,32 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
+interface Mensagem {
+  id: number;
+  senderId: number;
+  conteudo: string;
+  dataEnvio: string;
+}
+
+interface Conversa {
+  id: number;
+  mensagens: Mensagem[];
+}
+
 const AdvertiseView = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const ad = location.state?.ad;
   const { userId, id } = ad || {};
 
-  const [isNormalUser, setIsNormalUser] = useState();
+  const [isNormalUser, setIsNormalUser] = useState<boolean | undefined>();
   const [isWriting, setIsWriting] = useState(false); 
   const [comment, setComment] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [indexSelectedConversation, setIndexSelected] = useState(0)
-  const [listConversation, setListConversation] = useState([])
+  const [selectedConversation, setSelectedConversation] = useState<Conversa | null>(null);
+  const [indexSelectedConversation, setIndexSelectedConversation] = useState(0);
+  const [listConversation, setListConversation] = useState<Conversa[]>([])
 
   const getConversas = async () => {
     try {
@@ -59,7 +72,7 @@ const AdvertiseView = () => {
     }
   }
 
-  const initConversa = async (mensagem: unknown) => {
+  const initConversa = async (mensagem: string) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:8080/conversas/iniciar-conversa`, {
@@ -85,7 +98,9 @@ const AdvertiseView = () => {
     }
   }
 
-  const continuaConversa = async (mensagem: unknown) => {
+  const continuaConversa = async (mensagem: string) => {
+    if (!selectedConversation) return;
+    
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:8080/messages/sendmessage`, {
@@ -111,14 +126,13 @@ const AdvertiseView = () => {
     }
   };
   
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getChats = async (notInit = false) => {
     const result = await getConversas() 
     setListConversation(result)
     if(result.length > 0 && isNormalUser){
       setSelectedConversation(result[0])
-      setIndexSelected(0)
+      setIndexSelectedConversation(0)
     }
     if(!isNormalUser && notInit){
       setSelectedConversation(result[indexSelectedConversation])
@@ -150,6 +164,7 @@ const AdvertiseView = () => {
     setComment('');
     setIsWriting(false);
   };
+
   const handleCommentSubmitInit = async () => {
     const result = await initConversa(comment)
     if(result?.conversaId){
@@ -184,7 +199,7 @@ const AdvertiseView = () => {
           </div>
           <button
             className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
-            onClick={() => {setSelectedConversation(conversa); setIndexSelected(index)}}
+            onClick={() => {setSelectedConversation(conversa); setIndexSelectedConversation(index)}}
           >
             Visualizar Conversa
           </button>
@@ -196,54 +211,101 @@ const AdvertiseView = () => {
   const placeText1 = isNormalUser ? 'justify-start' : 'justify-end';
   const placeText2 = isNormalUser ? 'justify-end' : 'justify-start';
 
-  const renderFullConversation = () => (
-    <div>
-      {!isNormalUser &&
-        <button
-          className="mb-4 bg-gray-300 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-400 transition"
-          onClick={() => {setSelectedConversation(null); setIndexSelected(0)}}
-        >
-          Voltar
-        </button>
-      }
-      <div className="space-y-4">
-        {selectedConversation.mensagens.map((mensagem) => (
-          <div
-            key={mensagem.id}
-            
-            className={`flex ${mensagem.senderId === userId ? placeText1 : placeText2}`}
+  const renderFullConversation = () => {
+    if (!selectedConversation) return null;
+    
+    return (
+      <div>
+        {!isNormalUser && (
+          <button
+            className="mb-4 bg-gray-300 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-400 transition"
+            onClick={() => {setSelectedConversation(null); setIndexSelectedConversation(0)}}
           >
+            Voltar
+          </button>
+        )}
+        <div className="space-y-4">
+          {selectedConversation.mensagens.map((mensagem) => (
             <div
-              className={`${
-                mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
-              } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+              key={mensagem.id}
+              
+              className={`flex ${mensagem.senderId === userId ? placeText1 : placeText2}`}
             >
-              <p>{mensagem.conteudo}</p>
-              <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+              <div
+                className={`${
+                  mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
+                } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+              >
+                <p>{mensagem.conteudo}</p>
+                <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="flex gap-2 mt-4">
+          <input
+            type="text"
+            placeholder="Digite sua mensagem"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleCommentSubmit();
+            }}
+          />
+          <button
+            className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+            onClick={handleCommentSubmit}
+          >
+            Enviar
+          </button>
+        </div>
       </div>
-      <div className="flex gap-2 mt-4">
-        <input
-          type="text"
-          placeholder="Digite sua mensagem"
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleCommentSubmit();
-          }}
-        />
+    );
+  };
+
+  const handleGoBack = () => {
+    navigate('/advertises');
+  }
+
+  const renderCommentSection = () => {
+    if (!selectedConversation) {
+      if (isWriting) {
+        return (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Digite seu comentário"
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCommentSubmitInit();
+                }
+              }}
+              autoFocus
+            />
+            <button
+              className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+              onClick={handleCommentSubmitInit}
+            >
+              Enviar
+            </button>
+          </div>
+        );
+      }
+      return (
         <button
           className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
-          onClick={handleCommentSubmit}
+          onClick={() => setIsWriting(true)}
         >
-          Enviar
+          Iniciar Conversa
         </button>
-      </div>
-    </div>
-  );
+      );
+    }
+    return renderFullConversation();
+  };
 
   if (!ad) {
     return (
@@ -252,41 +314,6 @@ const AdvertiseView = () => {
       </div>
     );
   }
-
-  const a = (
-    !selectedConversation ?
-    (isWriting ? (
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Digite seu comentário"
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleCommentSubmitInit();
-            }
-          }}
-          autoFocus
-        />
-        <button
-          className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
-          onClick={handleCommentSubmitInit}
-        >
-          Enviar
-        </button>
-      </div>
-    ) : (
-      <button
-        className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
-        onClick={() => setIsWriting(true)}
-      >
-        Iniciar Conversa
-      </button>
-    )) : 
-    renderFullConversation()
-  )
 
   const b = (
     selectedConversation ? (
@@ -298,16 +325,27 @@ const AdvertiseView = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
-      {/* Renderizar o anúncio */}
+      
+      <button
+        className="mb-4 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center gap-2"
+        onClick={handleGoBack} 
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        </svg>
+        Voltar
+      </button>
+
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Galeria de Imagens */}
+       
         <div className="rounded-lg shadow-lg overflow-hidden">
           {ad.imagePaths && ad.imagePaths.length > 0 ? (
             <Carousel showThumbs={false} infiniteLoop showStatus={false} className="rounded-lg">
               {ad.imagePaths.map((path: string, index: number) => {
                 const fileName = path.substring(path.lastIndexOf('/') + 1);
                 return (
-                  <div key={index}>
+                  <div key={fileName}>
                     <img
                       src={`http://localhost:8080/anuncioImages/image/${fileName}`}
                       alt={`Imagem ${index + 1}`}
@@ -323,7 +361,7 @@ const AdvertiseView = () => {
             </div>
           )}
         </div>
-  
+
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{ad.title}</h1>
           <p className="text-2xl text-green-600 font-bold mb-4">
@@ -335,7 +373,7 @@ const AdvertiseView = () => {
           <p className="text-gray-700 text-base mb-6">
             <span className="font-semibold">Descrição:</span> {ad.description}
           </p>
-  
+
           <div className="border-t pt-4 mt-4">
             <p className="text-gray-700 text-base mb-2">
               <span className="font-semibold">Contato:</span> {ad.contactInfo}
@@ -344,7 +382,7 @@ const AdvertiseView = () => {
               <span className="font-semibold">Localização:</span> {ad.location}
             </p>
           </div>
-  
+
           <div className="mt-8">
             <button
               className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
@@ -355,14 +393,13 @@ const AdvertiseView = () => {
           </div>
         </div>
       </div>
-  
-      {/* Renderizar barra de comentários */}
+
+      {/* Renderizar barra de comentarios */}
       <div className="mt-10 border-t pt-4">
-        {isNormalUser ? a : b}
+        {isNormalUser ? renderCommentSection() : b}
       </div>
     </div>
   );
-  
 };
 
 export default AdvertiseView;
