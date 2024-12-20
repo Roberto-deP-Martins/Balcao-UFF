@@ -127,8 +127,8 @@ Este comando irá:
 
 - **docker-compose.yml**: Arquivo de configuração para orquestrar os contêineres (backend + banco de dados).
 - **Dockerfile**: Arquivo para construir a imagem Docker do backend.
-- **src/**: Código-fonte do backend em Java (Spring Boot).
-- **frontend/**: Código-fonte do frontend em React.
+- **balcao-uff/src/**: Código-fonte do backend em Java (Spring Boot).
+- **front-balcao-uff/**: Código-fonte do frontend em React.
 - **target/**: Pasta onde o arquivo JAR gerado pelo Maven será armazenado.
 - **uploads/**: (Não existe no projeto atualmente, pois o Docker gerencia o armazenamento de uploads).
 
