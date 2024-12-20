@@ -1,5 +1,10 @@
 FROM eclipse-temurin:17-jdk-jammy
 
+# Configura o fuso horário para o Brasil (São Paulo)
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+
 WORKDIR /app
 
 COPY target/*.jar app.jar

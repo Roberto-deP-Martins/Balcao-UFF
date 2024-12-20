@@ -5,6 +5,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1996
       POSTGRES_DB: emprestimo_livros
+      TZ: "America/Sao_Paulo"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
