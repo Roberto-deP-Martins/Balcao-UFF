@@ -66,7 +66,7 @@ npm install
 npm run dev
 ```
 
-O servidor de desenvolvimento do frontend estará disponível em `http://localhost:3000`.
+O servidor de desenvolvimento do frontend estará disponível em `http://localhost:5173`.
 
 ### 4. Subir o Backend com Docker
 
