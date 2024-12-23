@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,12 +25,14 @@ import com.google.api.client.json.gson.GsonFactory;
 import br.uff.balcao_uff.api.dto.AuthenticationDTO;
 import br.uff.balcao_uff.api.dto.request.UserRequestDTO;
 import br.uff.balcao_uff.api.dto.response.LoginResponseDTO;
+import br.uff.balcao_uff.api.dto.response.UserResponseDTO;
 import br.uff.balcao_uff.api.resource.swagger.AutentiticationResourceApi;
 import br.uff.balcao_uff.commons.util.enums.UserRole;
 import br.uff.balcao_uff.configuration.security.SecurityConfigurations;
 import br.uff.balcao_uff.configuration.security.TokenService;
 import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.repository.UserRepository;
+import br.uff.balcao_uff.service.AuthorizationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -46,6 +49,9 @@ public class AutentiticationResource implements AutentiticationResourceApi{
     
     @Autowired
     private TokenService tokenService;
+    
+    @Autowired
+    private AuthorizationService authorizationService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthenticationDTO data) {
@@ -119,6 +125,22 @@ public class AutentiticationResource implements AutentiticationResourceApi{
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error validating Google token.");
+        }
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<UserResponseDTO> getAuthenticatedUserInfo() {
+        try {
+            UserEntity user = authorizationService.getAuthenticatedUser();
+            UserResponseDTO response = UserResponseDTO.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .role(user.getRole().name())
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 

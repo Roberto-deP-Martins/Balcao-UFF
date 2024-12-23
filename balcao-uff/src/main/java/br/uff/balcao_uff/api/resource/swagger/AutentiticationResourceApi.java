@@ -1,5 +1,7 @@
 package br.uff.balcao_uff.api.resource.swagger;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -15,4 +17,7 @@ public interface AutentiticationResourceApi {
 
 	@Operation(summary = "Register user")
 	public ResponseEntity register(@RequestBody @Valid UserRequestDTO data);
+
+	@Operation(summary = "Register user")
+	public ResponseEntity googleLogin(Map<String, String> request);
 }

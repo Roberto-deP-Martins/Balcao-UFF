@@ -31,14 +31,45 @@ public class SecurityConfigurations {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        /**
+                         * Autenticação
+                         */
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/google-login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/current-user").authenticated()
+
+                        /**
+                         * Anúncios
+                         */
                         .requestMatchers(HttpMethod.POST, "/anuncios").authenticated()
                         .requestMatchers(HttpMethod.GET, "/anuncios").authenticated()
                         .requestMatchers(HttpMethod.POST, "/anuncios/category").authenticated()
                         .requestMatchers(HttpMethod.POST, "/anuncios/delete").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/auth/google-login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/anuncioImages/image/**").permitAll()
+
+                        /**
+                         * Reviews
+                         */
+                        .requestMatchers(HttpMethod.POST, "/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/reviews/user/**").authenticated()
+
+                        /**
+                         * Perfil Usuário
+                         */
+                        .requestMatchers(HttpMethod.POST, "/users/profile/**").authenticated()
+
+                        /**
+                         * Mensagens e conversas
+                         */
+                        .requestMatchers(HttpMethod.POST, "/messages/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/conversas/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/conversas/por-anuncio/**").authenticated()
+
+
+                        /**
+                         * Swagger
+                         */
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()

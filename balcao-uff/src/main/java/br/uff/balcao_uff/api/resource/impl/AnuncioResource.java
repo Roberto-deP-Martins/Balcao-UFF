@@ -42,14 +42,8 @@ public class AnuncioResource implements AnuncioResourceApi {
 	@Autowired
 	TokenService tokenService;
 
-	@PostMapping("/save")
-	public ResponseEntity<AnuncioResponseDTO> save(@RequestBody AnuncioRequestDTO anuncioRequestDTO) {
-		AnuncioResponseDTO savedAnuncio = service.save(anuncioRequestDTO);
-		return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
-	}
-
 	@PostMapping(value = "/save2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<AnuncioResponseDTO> save3(@RequestPart("anuncio") String anuncioJson,
+	public ResponseEntity<AnuncioResponseDTO> save(@RequestPart("anuncio") String anuncioJson,
 			@RequestPart(value = "images", required = false) List<MultipartFile> images) {
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -59,7 +53,7 @@ public class AnuncioResource implements AnuncioResourceApi {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 			}
 
-			AnuncioResponseDTO savedAnuncio = service.saveWithImages2(anuncioRequestDTO, images);
+			AnuncioResponseDTO savedAnuncio = service.saveWithImages(anuncioRequestDTO, images);
 			return ResponseEntity.status(HttpStatus.CREATED).body(savedAnuncio);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,5 +113,6 @@ public class AnuncioResource implements AnuncioResourceApi {
 		List<AnuncioResponseDTO> anuncioDto = new ArrayList<>();
 		return ResponseEntity.ok(anuncioDto);
 	}
+
 
 }

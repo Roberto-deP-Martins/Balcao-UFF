@@ -192,7 +192,7 @@ public class AnuncioService {
      * @throws RuntimeException se ocorrer erro durante o salvamento das imagens.
      */
     @Transactional
-    public AnuncioResponseDTO saveWithImages2(AnuncioRequestDTO anuncioRequestDTO, List<MultipartFile> images) {
+    public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, List<MultipartFile> images) {
         UserEntity user = authorizationService.getAuthenticatedUser();
         if (user == null) {
             throw new RuntimeException("Usuário não autenticado");

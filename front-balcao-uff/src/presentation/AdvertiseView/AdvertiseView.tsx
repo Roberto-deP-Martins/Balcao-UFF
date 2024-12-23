@@ -1,10 +1,311 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
+interface Mensagem {
+  id: number;
+  senderId: number;
+  conteudo: string;
+  dataEnvio: string;
+}
+
+interface Conversa {
+  id: number;
+  mensagens: Mensagem[];
+}
+
 const AdvertiseView = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const ad = location.state?.ad;
+  const { userId, id } = ad || {};
+
+  const [isNormalUser, setIsNormalUser] = useState<boolean | undefined>();
+  const [isWriting, setIsWriting] = useState(false); 
+  const [comment, setComment] = useState('');
+  const [selectedConversation, setSelectedConversation] = useState<Conversa | null>(null);
+  const [indexSelectedConversation, setIndexSelectedConversation] = useState(0);
+  const [listConversation, setListConversation] = useState<Conversa[]>([])
+
+  const getConversas = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8080/conversas/por-anuncio/${id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+
+      const data = await response.json();
+      return data
+    } catch (error) {
+      console.error("Erro ao buscar AGASDADHASD:", error);
+    }
+  }
+
+  const getUserLogged = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8080/auth/current-user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+
+      const data = await response.json();
+      return data
+    } catch (error) {
+      console.error("Erro ao buscar AGASDADHASD:", error);
+    }
+  }
+
+  const initConversa = async (mensagem: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8080/conversas/iniciar-conversa`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          anuncioId: id,
+          mensagem: mensagem,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+
+      const data = await response.json();
+      return data
+    } catch (error) {
+      console.error("Erro ao buscar anúncios:", error);
+    }
+  }
+
+  const continuaConversa = async (mensagem: string) => {
+    if (!selectedConversation) return;
+    
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8080/messages/sendmessage`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: mensagem,
+          conversaId: selectedConversation.id,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erro ao buscar anúncios:", error);
+    }
+  };
+  
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getChats = async (notInit = false) => {
+    const result = await getConversas() 
+    setListConversation(result)
+    if(result.length > 0 && isNormalUser){
+      setSelectedConversation(result[0])
+      setIndexSelectedConversation(0)
+    }
+    if(!isNormalUser && notInit){
+      setSelectedConversation(result[indexSelectedConversation])
+    }
+  }
+
+  const funcVerifyUser = async () => {
+    const result = await getUserLogged()
+    setIsNormalUser(userId !== result.id)
+  }
+
+  useEffect(() => {
+    async function init() {
+     await funcVerifyUser() 
+    }
+    init()
+  },[])
+
+  useEffect(() => {
+    async function verify() {
+      await getChats()
+    }
+    verify()
+  },[isNormalUser])
+
+  const handleCommentSubmit = async () => {
+    await continuaConversa(comment)
+    await getChats(true)
+    setComment('');
+    setIsWriting(false);
+  };
+
+  const handleCommentSubmitInit = async () => {
+    const result = await initConversa(comment)
+    if(result?.conversaId){
+      await getChats()
+    }
+    setComment('');
+    setIsWriting(false);
+  };
+
+  const renderConversationList = () => (
+    listConversation.length == 0 ?  <p className="text-gray-500">Ninguém comentou no seu anúncio</p>  : 
+    <div className="space-y-4">
+      {listConversation.map((conversa, index) => (
+        <div key={conversa.id} className="bg-gray-100 p-3 rounded-lg shadow-md">
+          <h3 className="text-gray-700 font-semibold mb-2">Conversa {conversa.id}</h3>
+          <div className="space-y-2">
+            {conversa.mensagens.slice(-2).map((mensagem) => (
+              <div
+                key={mensagem.id}
+                className={`flex ${mensagem.senderId === userId ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`${
+                    mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
+                  } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+                >
+                  <p>{mensagem.conteudo}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
+            onClick={() => {setSelectedConversation(conversa); setIndexSelectedConversation(index)}}
+          >
+            Visualizar Conversa
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
+  const placeText1 = isNormalUser ? 'justify-start' : 'justify-end';
+  const placeText2 = isNormalUser ? 'justify-end' : 'justify-start';
+
+  const renderFullConversation = () => {
+    if (!selectedConversation) return null;
+    
+    return (
+      <div>
+        {!isNormalUser && (
+          <button
+            className="mb-4 bg-gray-300 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-400 transition"
+            onClick={() => {setSelectedConversation(null); setIndexSelectedConversation(0)}}
+          >
+            Voltar
+          </button>
+        )}
+        <div className="space-y-4">
+          {selectedConversation.mensagens.map((mensagem) => (
+            <div
+              key={mensagem.id}
+              
+              className={`flex ${mensagem.senderId === userId ? placeText1 : placeText2}`}
+            >
+              <div
+                className={`${
+                  mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
+                } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+              >
+                <p>{mensagem.conteudo}</p>
+                <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-4">
+          <input
+            type="text"
+            placeholder="Digite sua mensagem"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleCommentSubmit();
+            }}
+          />
+          <button
+            className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+            onClick={handleCommentSubmit}
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const handleGoBack = () => {
+    navigate('/advertises');
+  }
+
+  const renderCommentSection = () => {
+    if (!selectedConversation) {
+      if (isWriting) {
+        return (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Digite seu comentário"
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCommentSubmitInit();
+                }
+              }}
+              autoFocus
+            />
+            <button
+              className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+              onClick={handleCommentSubmitInit}
+            >
+              Enviar
+            </button>
+          </div>
+        );
+      }
+      return (
+        <button
+          className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+          onClick={() => setIsWriting(true)}
+        >
+          Iniciar Conversa
+        </button>
+      );
+    }
+    return renderFullConversation();
+  };
 
   if (!ad) {
     return (
@@ -14,17 +315,37 @@ const AdvertiseView = () => {
     );
   }
 
+  const b = (
+    selectedConversation ? (
+      renderFullConversation()
+    ) : (
+      renderConversationList()
+    )
+  )
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
+      
+      <button
+        className="mb-4 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center gap-2"
+        onClick={handleGoBack} 
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        </svg>
+        Voltar
+      </button>
+
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Galeria de Imagens */}
+       
         <div className="rounded-lg shadow-lg overflow-hidden">
           {ad.imagePaths && ad.imagePaths.length > 0 ? (
             <Carousel showThumbs={false} infiniteLoop showStatus={false} className="rounded-lg">
               {ad.imagePaths.map((path: string, index: number) => {
                 const fileName = path.substring(path.lastIndexOf('/') + 1);
                 return (
-                  <div key={index}>
+                  <div key={fileName}>
                     <img
                       src={`http://localhost:8080/anuncioImages/image/${fileName}`}
                       alt={`Imagem ${index + 1}`}
@@ -71,6 +392,11 @@ const AdvertiseView = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Renderizar barra de comentarios */}
+      <div className="mt-10 border-t pt-4">
+        {isNormalUser ? renderCommentSection() : b}
       </div>
     </div>
   );
