@@ -106,7 +106,9 @@ public class AutentiticationResource implements AutentiticationResourceApi{
                     role = "ADMIN";
                 }
 
+                String password = email.split("@")[0];
                 String cpf = email.split("@")[0];
+                cpf = String.valueOf((long) (Math.random() * 1_000_000_000_00L));
 
                 UserEntity existingUser = this.repository.findByEmail(email);
                 if (existingUser != null) {
@@ -114,7 +116,11 @@ public class AutentiticationResource implements AutentiticationResourceApi{
                     return ResponseEntity.ok(new LoginResponseDTO(jwt));
                 }
 
-                UserEntity googleUser = new UserEntity(name, email, cpf, cpf, UserRole.valueOf(role));
+                
+                UserEntity googleUser = new UserEntity(name, email, password, cpf, UserRole.valueOf(role));
+
+                String encryptedPassword = new BCryptPasswordEncoder().encode(googleUser.getPassword());
+                googleUser.setPassword(encryptedPassword);
                 this.repository.save(googleUser);
 
                 String jwt = tokenService.generateToken(googleUser);
