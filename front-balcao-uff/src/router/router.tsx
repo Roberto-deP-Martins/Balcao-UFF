@@ -3,6 +3,7 @@ import Home from '../presentation/Home/Home';
 import ListAdvertise from '../presentation/AdvertiseScene/ListAdvertise';
 import Login from '../presentation/Login/Login';
 import AdvertiseView from '../presentation/AdvertiseView/AdvertiseView';
+import Perfil from '../presentation/Perfil/Perfil'
 
 export const router = createBrowserRouter([
 
@@ -27,5 +28,9 @@ export const router = createBrowserRouter([
   {
     path: "/advertiseView",
     element: <AdvertiseView />
+  },
+  {
+    path: "/perfil",
+    element: <Perfil />
   }
 ]);
