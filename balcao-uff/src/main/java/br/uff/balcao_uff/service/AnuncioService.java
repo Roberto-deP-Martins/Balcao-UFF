@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -80,26 +81,37 @@ public class AnuncioService {
         AnuncioEntity existingAnuncio = anuncioRepository.findById(anuncioRequestDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
 
-        if (anuncioRequestDTO.getTitle() != null) {
-            existingAnuncio.setTitle(anuncioRequestDTO.getTitle());
-        }
-        if (anuncioRequestDTO.getDescription() != null) {
-            existingAnuncio.setDescription(anuncioRequestDTO.getDescription());
-        }
-        if (anuncioRequestDTO.getCategory() != null) {
-            existingAnuncio.setCategory(anuncioRequestDTO.getCategory());
-        }
-        if (anuncioRequestDTO.getPrice() != 0) {
-            existingAnuncio.setPrice(anuncioRequestDTO.getPrice());
-        }
-        if (anuncioRequestDTO.getContactInfo() != null) {
-            existingAnuncio.setContactInfo(anuncioRequestDTO.getContactInfo());
-        }
-        if (anuncioRequestDTO.getLocation() != null) {
-            existingAnuncio.setLocation(anuncioRequestDTO.getLocation());
-        }
+        updateIfNotNull(existingAnuncio::setTitle, anuncioRequestDTO.getTitle());
+        updateIfNotNull(existingAnuncio::setDescription, anuncioRequestDTO.getDescription());
+        updateIfNotNull(existingAnuncio::setCategory, anuncioRequestDTO.getCategory());
+        updateIfNotZero(existingAnuncio::setPrice, anuncioRequestDTO.getPrice());
+        updateIfNotNull(existingAnuncio::setContactInfo, anuncioRequestDTO.getContactInfo());
+        updateIfNotNull(existingAnuncio::setLocation, anuncioRequestDTO.getLocation());
 
         anuncioRepository.save(existingAnuncio);
+    }
+
+    /**
+     * Atualiza um atributo de um anúncio se o valor fornecido não for nulo.
+     * @param <T>
+     * @param setter
+     * @param value
+     */
+    private <T> void updateIfNotNull(Consumer<T> setter, T value) {
+        if (value != null) {
+            setter.accept(value);
+        }
+    }
+
+    /**
+     * Atualiza um atributo de um anúncio se o valor fornecido for diferente de zero.
+     * @param setter
+     * @param value
+     */
+    private void updateIfNotZero(Consumer<Double> setter, double value) {
+        if (value != 0) {
+            setter.accept(value);
+        }
     }
 
     /**
@@ -214,6 +226,9 @@ public class AnuncioService {
                 try {
                     String uniqueID = UUID.randomUUID().toString();
                     Path caminho = Paths.get(caminhoImagem + uniqueID + "_" + image.getOriginalFilename());
+                    if (!Files.exists(caminho.getParent())) {
+                        Files.createDirectories(caminho.getParent());
+                    }
                     Files.write(caminho, image.getBytes());
                     AnuncioImageEntity imageEntity = AnuncioImageEntity.builder()
                             .imagePath(caminho.toString())
