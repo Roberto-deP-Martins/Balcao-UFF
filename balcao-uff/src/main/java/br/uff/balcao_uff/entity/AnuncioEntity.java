@@ -32,43 +32,44 @@ import lombok.Setter;
 @Table(name = "tb_anuncio")
 public class AnuncioEntity implements Serializable {
 
-	private static final long serialVersionUID = -140827022243065844L;
+    private static final long serialVersionUID = -140827022243065844L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@JsonProperty(value = "title")
-	private String title;
+    @JsonProperty(value = "title")
+    private String title;
 
-	@JsonProperty(value = "description")
-	private String description;
+    @JsonProperty(value = "description")
+    private String description;
 
-	@JsonProperty(value = "category")
-	private String category;
+    @JsonProperty(value = "category")
+    private String category;
 
-	@JsonProperty(value = "price")
-	private double price;
+    @JsonProperty(value = "price")
+    private double price;
 
-	@JsonProperty(value = "contact_info")
-	@Column(name = "contact_info")
-	private String contactInfo;
+    @JsonProperty(value = "contact_info")
+    @Column(name = "contact_info")
+    private String contactInfo;
 
-	@JsonProperty(value = "location")
-	private String location;
-	
-	@Column(name="dt_criacao")
-	private Date dtCriacao;
-	
-	@PrePersist
-	protected void onCreate() {
-		this.dtCriacao = new Date();
-	}
+    @ManyToOne
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
+    private LocationEntity location;
+    
+    @Column(name = "dt_criacao")
+    private Date dtCriacao;
+    
+    @PrePersist
+    protected void onCreate() {
+        this.dtCriacao = new Date();
+    }
 
-	@ManyToOne
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private UserEntity user;
-	
-	@OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<AnuncioImageEntity> images;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private UserEntity user;
+    
+    @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnuncioImageEntity> images;
 }

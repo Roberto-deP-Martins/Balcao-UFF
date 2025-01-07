@@ -15,21 +15,23 @@ import lombok.Setter;
 public class AnuncioRequestDTO {
 
 	private Long id;
-	
+
 	@NotEmpty(message = "O título não pode ser vazio")
-    private String title;
+	private String title;
 
-    @NotEmpty(message = "A descrição não pode ser vazia")
-    private String description;
+	@NotEmpty(message = "A descrição não pode ser vazia")
+	private String description;
 
-    @NotEmpty(message = "A categoria não pode ser vazia")
-    private String category;
+	@NotEmpty(message = "A categoria não pode ser vazia")
+	private String category;
 
 	private double price;
-	
+
 	private String contactInfo;
-	
-	private String location;
-	
+
+	private double latitude;
+	private double longitude;
+	private String address;
+
 	private Long userId;
 }
