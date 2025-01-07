@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +19,11 @@ import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.AnuncioImageEntity;
+import br.uff.balcao_uff.entity.LocationEntity;
 import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.repository.AnuncioImageRepository;
 import br.uff.balcao_uff.repository.AnuncioRepository;
+import br.uff.balcao_uff.repository.LocationRepository;
 import br.uff.balcao_uff.repository.UserRepository;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -38,68 +41,98 @@ public class AnuncioService {
     private final AnuncioImageRepository anuncioImageRepository;
     private final UserRepository userRepository;
     private final AuthorizationService authorizationService;
+    private final LocationRepository locationRepository;
 
     @Value("${app.caminhoImagem}")
     private String caminhoImagem;
 
     /**
-     * Salva um novo anúncio sem imagens associadas.
-     *
-     * @param anuncioRequestDTO os dados do anúncio fornecidos pelo cliente.
-     * @return o anúncio salvo convertido para um DTO de resposta.
-     * @throws RuntimeException se o usuário associado ao anúncio não for encontrado.
+ * Salva um novo anúncio sem imagens associadas.
+ *
+ * @param anuncioRequestDTO os dados do anúncio fornecidos pelo cliente.
+ * @return o anúncio salvo convertido para um DTO de resposta.
+ * @throws RuntimeException se o usuário associado ao anúncio não for encontrado.
+ */
+@Transactional
+public AnuncioResponseDTO save(AnuncioRequestDTO anuncioRequestDTO) {
+    UserEntity user = userRepository.findById(anuncioRequestDTO.getUserId())
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+    LocationEntity location = new LocationEntity();
+    location.setLatitude(anuncioRequestDTO.getLatitude());
+    location.setLongitude(anuncioRequestDTO.getLongitude());
+    location.setAddress(anuncioRequestDTO.getAddress());
+    LocationEntity savedLocation = locationRepository.save(location);
+
+    AnuncioEntity anuncioEntity = AnuncioEntity.builder()
+            .title(anuncioRequestDTO.getTitle())
+            .description(anuncioRequestDTO.getDescription())
+            .category(anuncioRequestDTO.getCategory())
+            .price(anuncioRequestDTO.getPrice())
+            .contactInfo(anuncioRequestDTO.getContactInfo())
+            .location(savedLocation)
+            .user(user)
+            .build();
+
+    AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
+
+    return convertToDto(savedAnuncio);
+}
+
+
+    /**
+ * Atualiza os dados de um anúncio existente.
+ *
+ * @param anuncioRequestDTO os novos dados do anúncio.
+ * @throws RuntimeException se o anúncio não for encontrado.
+ */
+@Transactional
+public void update(AnuncioRequestDTO anuncioRequestDTO) {
+    AnuncioEntity existingAnuncio = anuncioRepository.findById(anuncioRequestDTO.getId())
+            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+
+    updateIfNotNull(existingAnuncio::setTitle, anuncioRequestDTO.getTitle());
+    updateIfNotNull(existingAnuncio::setDescription, anuncioRequestDTO.getDescription());
+    updateIfNotNull(existingAnuncio::setCategory, anuncioRequestDTO.getCategory());
+    updateIfNotZero(existingAnuncio::setPrice, anuncioRequestDTO.getPrice());
+    updateIfNotNull(existingAnuncio::setContactInfo, anuncioRequestDTO.getContactInfo());
+
+    if (anuncioRequestDTO.getLatitude() != 0 && anuncioRequestDTO.getLongitude() != 0) {
+        LocationEntity location = existingAnuncio.getLocation();
+        location.setLatitude(anuncioRequestDTO.getLatitude());
+        location.setLongitude(anuncioRequestDTO.getLongitude());
+        location.setAddress(anuncioRequestDTO.getAddress());
+        locationRepository.save(location);
+    }
+
+    anuncioRepository.save(existingAnuncio);
+}
+
+
+    /**
+     * Atualiza um atributo de um anúncio se o valor fornecido não for nulo.
+     * 
+     * @param <T>
+     * @param setter
+     * @param value
      */
-    @Transactional
-    public AnuncioResponseDTO save(AnuncioRequestDTO anuncioRequestDTO) {
-        UserEntity user = userRepository.findById(anuncioRequestDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        AnuncioEntity anuncioEntity = AnuncioEntity.builder()
-                .title(anuncioRequestDTO.getTitle())
-                .description(anuncioRequestDTO.getDescription())
-                .category(anuncioRequestDTO.getCategory())
-                .price(anuncioRequestDTO.getPrice())
-                .contactInfo(anuncioRequestDTO.getContactInfo())
-                .location(anuncioRequestDTO.getLocation())
-                .user(user)
-                .build();
-
-        AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
-
-        return convertToDto(savedAnuncio);
+    private <T> void updateIfNotNull(Consumer<T> setter, T value) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 
     /**
-     * Atualiza os dados de um anúncio existente.
-     *
-     * @param anuncioRequestDTO os novos dados do anúncio.
-     * @throws RuntimeException se o anúncio não for encontrado.
+     * Atualiza um atributo de um anúncio se o valor fornecido for diferente de
+     * zero.
+     * 
+     * @param setter
+     * @param value
      */
-    @Transactional
-    public void update(AnuncioRequestDTO anuncioRequestDTO) {
-        AnuncioEntity existingAnuncio = anuncioRepository.findById(anuncioRequestDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-
-        if (anuncioRequestDTO.getTitle() != null) {
-            existingAnuncio.setTitle(anuncioRequestDTO.getTitle());
+    private void updateIfNotZero(Consumer<Double> setter, double value) {
+        if (value != 0) {
+            setter.accept(value);
         }
-        if (anuncioRequestDTO.getDescription() != null) {
-            existingAnuncio.setDescription(anuncioRequestDTO.getDescription());
-        }
-        if (anuncioRequestDTO.getCategory() != null) {
-            existingAnuncio.setCategory(anuncioRequestDTO.getCategory());
-        }
-        if (anuncioRequestDTO.getPrice() != 0) {
-            existingAnuncio.setPrice(anuncioRequestDTO.getPrice());
-        }
-        if (anuncioRequestDTO.getContactInfo() != null) {
-            existingAnuncio.setContactInfo(anuncioRequestDTO.getContactInfo());
-        }
-        if (anuncioRequestDTO.getLocation() != null) {
-            existingAnuncio.setLocation(anuncioRequestDTO.getLocation());
-        }
-
-        anuncioRepository.save(existingAnuncio);
     }
 
     /**
@@ -146,6 +179,8 @@ public class AnuncioService {
         List<String> imagePaths = anuncioEntity.getImages() != null
                 ? anuncioEntity.getImages().stream().map(AnuncioImageEntity::getImagePath).collect(Collectors.toList())
                 : Collections.emptyList();
+                LocationEntity location = anuncioEntity.getLocation();
+                String locationString = (location != null) ? location.getAddress() : null;
 
         return AnuncioResponseDTO.builder()
                 .id(anuncioEntity.getId())
@@ -154,12 +189,13 @@ public class AnuncioService {
                 .category(anuncioEntity.getCategory())
                 .price(anuncioEntity.getPrice())
                 .contactInfo(anuncioEntity.getContactInfo())
-                .location(anuncioEntity.getLocation())
+                .location(locationString)
                 .userId(anuncioEntity.getUser().getId())
                 .imagePaths(imagePaths)
                 .dtCriacao(anuncioEntity.getDtCriacao())
                 .build();
     }
+
 
     /**
      * Realiza uma busca de anúncios com base em critérios avançados fornecidos.
@@ -184,51 +220,73 @@ public class AnuncioService {
     }
 
     /**
-     * Salva um novo anúncio com imagens associadas.
-     *
-     * @param anuncioRequestDTO os dados do anúncio.
-     * @param images a lista de imagens a serem associadas ao anúncio.
-     * @return o anúncio salvo convertido para um DTO de resposta.
-     * @throws RuntimeException se ocorrer erro durante o salvamento das imagens.
-     */
-    @Transactional
-    public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, List<MultipartFile> images) {
-        UserEntity user = authorizationService.getAuthenticatedUser();
-        if (user == null) {
-            throw new RuntimeException("Usuário não autenticado");
-        }
+ * Salva um novo anúncio com imagens associadas.
+ *
+ * @param anuncioRequestDTO os dados do anúncio.
+ * @param images            a lista de imagens a serem associadas ao anúncio.
+ * @return o anúncio salvo convertido para um DTO de resposta.
+ * @throws RuntimeException se ocorrer erro durante o salvamento das imagens.
+ */
+@Transactional
+public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, List<MultipartFile> images) {
+    UserEntity user = authorizationService.getAuthenticatedUser();
+    if (user == null) {
+        throw new RuntimeException("Usuário não autenticado");
+    }
 
-        AnuncioEntity anuncioEntity = AnuncioEntity.builder()
-                .title(anuncioRequestDTO.getTitle())
-                .description(anuncioRequestDTO.getDescription())
-                .category(anuncioRequestDTO.getCategory())
-                .price(anuncioRequestDTO.getPrice())
-                .contactInfo(anuncioRequestDTO.getContactInfo())
-                .location(anuncioRequestDTO.getLocation())
-                .user(user)
-                .build();
-        AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
+    LocationEntity location = new LocationEntity();
+    location.setLatitude(anuncioRequestDTO.getLatitude());
+    location.setLongitude(anuncioRequestDTO.getLongitude());
+    location.setAddress(anuncioRequestDTO.getAddress());
+    LocationEntity savedLocation = locationRepository.save(location);
 
-        if (images != null) {
-            images.forEach(image -> {
-                try {
-                    String uniqueID = UUID.randomUUID().toString();
-                    Path caminho = Paths.get(caminhoImagem + uniqueID + "_" + image.getOriginalFilename());
-                    Files.write(caminho, image.getBytes());
-                    AnuncioImageEntity imageEntity = AnuncioImageEntity.builder()
-                            .imagePath(caminho.toString())
-                            .anuncio(savedAnuncio)
-                            .build();
-                    anuncioImageRepository.save(imageEntity);
-                } catch (Exception e) {
-                    throw new RuntimeException("Erro ao salvar imagem: " + e.getMessage());
+    AnuncioEntity anuncioEntity = AnuncioEntity.builder()
+            .title(anuncioRequestDTO.getTitle())
+            .description(anuncioRequestDTO.getDescription())
+            .category(anuncioRequestDTO.getCategory())
+            .price(anuncioRequestDTO.getPrice())
+            .contactInfo(anuncioRequestDTO.getContactInfo())
+            .location(savedLocation)
+            .user(user)
+            .build();
+    AnuncioEntity savedAnuncio = anuncioRepository.save(anuncioEntity);
+
+    if (images != null) {
+        images.forEach(image -> {
+            try {
+                String uniqueID = UUID.randomUUID().toString();
+                Path caminho = Paths.get(caminhoImagem + uniqueID + "_" + image.getOriginalFilename());
+                if (!Files.exists(caminho.getParent())) {
+                    Files.createDirectories(caminho.getParent());
                 }
-            });
-        }
+                Files.write(caminho, image.getBytes());
+                AnuncioImageEntity imageEntity = AnuncioImageEntity.builder()
+                        .imagePath(caminho.toString())
+                        .anuncio(savedAnuncio)
+                        .build();
+                anuncioImageRepository.save(imageEntity);
+            } catch (Exception e) {
+                throw new RuntimeException("Erro ao salvar imagem: " + e.getMessage());
+            }
+        });
+    }
 
-        AnuncioEntity anuncioWithImages = anuncioRepository.findById(savedAnuncio.getId())
-                .orElseThrow(() -> new RuntimeException("Erro ao carregar o anúncio salvo"));
+    AnuncioEntity anuncioWithImages = anuncioRepository.findById(savedAnuncio.getId())
+            .orElseThrow(() -> new RuntimeException("Erro ao carregar o anúncio salvo"));
 
-        return convertToDto(anuncioWithImages);
+    return convertToDto(anuncioWithImages);
+}
+
+
+    /**
+     * Busca anúncios por localização dentro de um raio específico. 
+     * @param lat a latitude do ponto de referência.
+     * @param lng a longitude do ponto de referência.
+     * @param radius o raio de busca em quilômetros. 
+     * @return uma lista de DTOs de resposta contendo os anúncios encontrados.
+     */
+    public List<AnuncioResponseDTO> findNearby(double lat, double lng, double radius) {
+        List<AnuncioEntity> anuncios = anuncioRepository.findNearby(lat, lng, radius);
+        return anuncios.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 }

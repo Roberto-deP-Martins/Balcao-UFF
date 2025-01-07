@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import AdvertiseCard from "../../components/AdvertiseCard";
+import { FaSearch } from "react-icons/fa";
 
 const ListAdvertise = () => {
   const [activeTab, setActiveTab] = useState<"list" | "create">("list");
@@ -9,16 +9,32 @@ const ListAdvertise = () => {
   const [category, setCategory] = useState<string>("");
   const [price, setPrice] = useState<number | "">("");
   const [contactInfo, setContactInfo] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
   const [image1, setImage1] = useState<File | null>(null);
   const [image2, setImage2] = useState<File | null>(null);
   const [image3, setImage3] = useState<File | null>(null);
   const [advertises, setAdvertises] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   useEffect(() => {
     if (activeTab === "list") {
       fetchAdvertises();
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+        },
+        (error) => {
+          console.error("Error getting geolocation: ", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
     }
   }, [activeTab]);
 
@@ -74,6 +90,37 @@ const ListAdvertise = () => {
     }
   };
 
+  const handleSearchByLocation = async () => {
+    if (latitude === null || longitude === null) {
+      setError("Não foi possível obter a localização.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:8080/anuncios/nearby?lat=${latitude}&lng=${longitude}&radius=10`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
+      }
+
+      const data = await response.json();
+      setAdvertises(data);
+    } catch (error) {
+      console.error("Erro ao buscar anúncios próximos:", error);
+    }
+  };
+
   const handleTabChange = (tab: "list" | "create") => {
     if (tab === "create") {
       setCategory("");
@@ -84,29 +131,31 @@ const ListAdvertise = () => {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-  
+
     if (!image1 || !image2 || !image3) {
       setError("Por favor, envie exatamente 3 imagens.");
       return;
     }
-  
+
     const token = localStorage.getItem("token");
-  
+
     const newAd = {
       title,
       description,
       category,
       price: Number(price),
       contactInfo,
-      location,
+      address,
+      latitude,
+      longitude,
     };
-  
+
     const formData = new FormData();
     formData.append("anuncio", JSON.stringify(newAd));
     formData.append("images", image1);
     formData.append("images", image2);
     formData.append("images", image3);
-  
+
     try {
       const response = await fetch("http://localhost:8080/anuncios/save2", {
         method: "POST",
@@ -115,7 +164,7 @@ const ListAdvertise = () => {
         },
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         setError(
@@ -125,16 +174,16 @@ const ListAdvertise = () => {
         );
         return;
       }
-  
+
       const data = await response.json();
       console.log("Anúncio salvo com sucesso:", data);
-  
+
       setTitle("");
       setDescription("");
       setCategory("");
       setPrice("");
       setContactInfo("");
-      setLocation("");
+      setAddress("");
       setImage1(null);
       setImage2(null);
       setImage3(null);
@@ -144,7 +193,9 @@ const ListAdvertise = () => {
       console.error("Erro ao salvar anúncio:", error);
     }
   };
-  
+
+  console.log("Latitude:", latitude);
+  console.log("Longitude:", longitude);
 
   return (
     <div className="w-screen h-full">
@@ -169,25 +220,45 @@ const ListAdvertise = () => {
 
       {activeTab === "list" && (
         <div className="p-4">
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Buscar por categoria"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearchByCategory();
-                }
-              }}
-              className="w-full p-2 border border-gray-300 rounded mb-2"
-            />
-            <button
-              onClick={handleSearchByCategory}
-              className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Buscar
-            </button>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center flex-grow">
+              <div className="flex flex-col w-full">
+                <div className="flex">
+                  <input
+                    type="text"
+                    placeholder="Digite a categoria"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSearchByCategory();
+                      }
+                    }}
+                    className="p-2 border border-gray-300 rounded mb-2 w-2/3"
+                  />
+                  <button
+                    onClick={handleSearchByCategory}
+                    className="w-10 h-10 flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 ml-2"
+                  >
+                    <FaSearch />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-blue-600"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    handleSearchByLocation();
+                  } else {
+                    fetchAdvertises();
+                  }
+                }}
+              />
+              <span className="text-gray-700">Anúncios Próximos</span>
+            </label>
           </div>
           {advertises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -236,6 +307,7 @@ const ListAdvertise = () => {
             }
             className="w-full p-2 border border-gray-300 rounded"
           />
+
           <input
             type="text"
             placeholder="Informações de contato"
@@ -245,9 +317,9 @@ const ListAdvertise = () => {
           />
           <input
             type="text"
-            placeholder="Localização"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Endereço"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
           />
           <input

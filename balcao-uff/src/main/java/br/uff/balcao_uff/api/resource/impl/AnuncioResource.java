@@ -115,4 +115,18 @@ public class AnuncioResource implements AnuncioResourceApi {
 	}
 
 
+	/**
+	 * Busca anúncios por localização dentro de um raio específico.
+	 * @param lat a latitude do ponto de referência. 
+	 * @param lng a longitude do ponto de referência.
+	 * @param radius o raio de busca em quilômetros.
+	 * @return uma lista de DTOs de resposta contendo os anúncios encontrados.
+	 */
+	@GetMapping("/nearby")
+	public ResponseEntity<List<AnuncioResponseDTO>> findNearby(@RequestParam double lat, @RequestParam double lng,
+			@RequestParam double radius) {
+		List<AnuncioResponseDTO> anuncios = service.findNearby(lat, lng, radius);
+		return ResponseEntity.ok(anuncios);
+	}
+
 }
