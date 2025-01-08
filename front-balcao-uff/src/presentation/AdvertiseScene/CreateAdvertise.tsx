@@ -16,13 +16,13 @@ const CreateAdvertise = () => {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [error, setError] = useState<string>("");
-    
+
     const navigate = useNavigate();
 
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
-    
+
         if (!image1 || !image2 || !image3) {
             Swal.fire({
                 title: 'Erro',
@@ -32,7 +32,7 @@ const CreateAdvertise = () => {
             });
             return;
         }
-    
+
         const result = await Swal.fire({
             title: 'Você tem certeza?',
             text: "Deseja realmente salvar este anúncio?",
@@ -41,10 +41,10 @@ const CreateAdvertise = () => {
             confirmButtonText: 'Sim, salvar!',
             cancelButtonText: 'Não, cancelar',
         });
-    
+
         if (result.isConfirmed) {
             const token = localStorage.getItem("token");
-    
+
             const newAd = {
                 title,
                 description,
@@ -55,13 +55,13 @@ const CreateAdvertise = () => {
                 latitude,
                 longitude,
             };
-    
+
             const formData = new FormData();
             formData.append("anuncio", JSON.stringify(newAd));
             formData.append("images", image1);
             formData.append("images", image2);
             formData.append("images", image3);
-    
+
             try {
                 const response = await fetch("http://localhost:8080/anuncios/save2", {
                     method: "POST",
@@ -70,16 +70,16 @@ const CreateAdvertise = () => {
                     },
                     body: formData,
                 });
-    
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     setError(errorData.message || "Erro ao salvar anúncio");
                     return;
                 }
-    
+
                 const data = await response.json();
                 console.log("Anúncio salvo com sucesso:", data);
-    
+
                 setTitle("");
                 setDescription("");
                 setCategory("");
@@ -89,22 +89,22 @@ const CreateAdvertise = () => {
                 setImage1(null);
                 setImage2(null);
                 setImage3(null);
-    
+
                 Swal.fire(
                     'Sucesso!',
                     'Seu anúncio foi salvo com sucesso!',
                     'success'
                 );
-    
+
                 navigate("/advertises");
-    
+
             } catch (error) {
                 setError("Erro ao salvar anúncio.");
                 console.error("Erro ao salvar anúncio:", error);
             }
         }
     };
-    
+
 
     return (
         <div className="w-screen h-full p-4">
@@ -149,8 +149,8 @@ const CreateAdvertise = () => {
                     className="w-full p-2 border border-gray-300 rounded"
                 />
 
-                <div className="w-full p-2 border border-gray-300 rounded mb-4">
-                    Endereço: {address}
+                <div className="text-xl font-semibold mb-4 text-left">
+                    Endereço
                 </div>
 
                 <Maps
@@ -160,6 +160,9 @@ const CreateAdvertise = () => {
                         setAddress(address);
                     }}
                 />
+                <div className="text-xl font-semibold mb-4 text-left">
+                    Selecionar Imagens
+                </div>
 
                 <input
                     type="file"
