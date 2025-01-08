@@ -2,18 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-
-interface Mensagem {
-  id: number;
-  senderId: number;
-  conteudo: string;
-  dataEnvio: string;
-}
-
-interface Conversa {
-  id: number;
-  mensagens: Mensagem[];
-}
+import { CreateConversa } from '../../interfaces/interfaces';
 
 const AdvertiseView = () => {
   const location = useLocation();
@@ -22,11 +11,11 @@ const AdvertiseView = () => {
   const { userId, id } = ad || {};
 
   const [isNormalUser, setIsNormalUser] = useState<boolean | undefined>();
-  const [isWriting, setIsWriting] = useState(false); 
+  const [isWriting, setIsWriting] = useState(false);
   const [comment, setComment] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<Conversa | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<CreateConversa | null>(null);
   const [indexSelectedConversation, setIndexSelectedConversation] = useState(0);
-  const [listConversation, setListConversation] = useState<Conversa[]>([])
+  const [listConversation, setListConversation] = useState<CreateConversa[]>([])
 
   const getConversas = async () => {
     try {
@@ -100,7 +89,7 @@ const AdvertiseView = () => {
 
   const continuaConversa = async (mensagem: string) => {
     if (!selectedConversation) return;
-    
+
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:8080/messages/sendmessage`, {
@@ -114,27 +103,27 @@ const AdvertiseView = () => {
           conversaId: selectedConversation.id,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Erro na requisição");
       }
-  
+
       const data = await response.json();
       return data;
     } catch (error) {
       console.error("Erro ao buscar anúncios:", error);
     }
   };
-  
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getChats = async (notInit = false) => {
-    const result = await getConversas() 
+    const result = await getConversas()
     setListConversation(result)
-    if(result.length > 0 && isNormalUser){
+    if (result.length > 0 && isNormalUser) {
       setSelectedConversation(result[0])
       setIndexSelectedConversation(0)
     }
-    if(!isNormalUser && notInit){
+    if (!isNormalUser && notInit) {
       setSelectedConversation(result[indexSelectedConversation])
     }
   }
@@ -146,17 +135,17 @@ const AdvertiseView = () => {
 
   useEffect(() => {
     async function init() {
-     await funcVerifyUser() 
+      await funcVerifyUser()
     }
     init()
-  },[])
+  }, [])
 
   useEffect(() => {
     async function verify() {
       await getChats()
     }
     verify()
-  },[isNormalUser])
+  }, [isNormalUser])
 
   const handleCommentSubmit = async () => {
     await continuaConversa(comment)
@@ -167,7 +156,7 @@ const AdvertiseView = () => {
 
   const handleCommentSubmitInit = async () => {
     const result = await initConversa(comment)
-    if(result?.conversaId){
+    if (result?.conversaId) {
       await getChats()
     }
     setComment('');
@@ -175,37 +164,36 @@ const AdvertiseView = () => {
   };
 
   const renderConversationList = () => (
-    listConversation.length == 0 ?  <p className="text-gray-500">Ninguém comentou no seu anúncio</p>  : 
-    <div className="space-y-4">
-      {listConversation.map((conversa, index) => (
-        <div key={conversa.id} className="bg-gray-100 p-3 rounded-lg shadow-md">
-          <h3 className="text-gray-700 font-semibold mb-2">Conversa {conversa.id}</h3>
-          <div className="space-y-2">
-            {conversa.mensagens.slice(-2).map((mensagem) => (
-              <div
-                key={mensagem.id}
-                className={`flex ${mensagem.senderId === userId ? 'justify-end' : 'justify-start'}`}
-              >
+    listConversation.length == 0 ? <p className="text-gray-500">Ninguém comentou no seu anúncio</p> :
+      <div className="space-y-4">
+        {listConversation.map((conversa, index) => (
+          <div key={conversa.id} className="bg-gray-100 p-3 rounded-lg shadow-md">
+            <h3 className="text-gray-700 font-semibold mb-2">Conversa {conversa.id}</h3>
+            <div className="space-y-2">
+              {conversa.mensagens.slice(-2).map((mensagem) => (
                 <div
-                  className={`${
-                    mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
-                  } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+                  key={mensagem.id}
+                  className={`flex ${mensagem.senderId === userId ? 'justify-end' : 'justify-start'}`}
                 >
-                  <p>{mensagem.conteudo}</p>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+                  <div
+                    className={`${mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
+                      } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+                  >
+                    <p>{mensagem.conteudo}</p>
+                    <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <button
+              className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
+              onClick={() => { setSelectedConversation(conversa); setIndexSelectedConversation(index) }}
+            >
+              Visualizar Conversa
+            </button>
           </div>
-          <button
-            className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
-            onClick={() => {setSelectedConversation(conversa); setIndexSelectedConversation(index)}}
-          >
-            Visualizar Conversa
-          </button>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
   );
 
   const placeText1 = isNormalUser ? 'justify-start' : 'justify-end';
@@ -213,13 +201,13 @@ const AdvertiseView = () => {
 
   const renderFullConversation = () => {
     if (!selectedConversation) return null;
-    
+
     return (
       <div>
         {!isNormalUser && (
           <button
             className="mb-4 bg-gray-300 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-400 transition"
-            onClick={() => {setSelectedConversation(null); setIndexSelectedConversation(0)}}
+            onClick={() => { setSelectedConversation(null); setIndexSelectedConversation(0) }}
           >
             Voltar
           </button>
@@ -228,13 +216,12 @@ const AdvertiseView = () => {
           {selectedConversation.mensagens.map((mensagem) => (
             <div
               key={mensagem.id}
-              
+
               className={`flex ${mensagem.senderId === userId ? placeText1 : placeText2}`}
             >
               <div
-                className={`${
-                  mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
-                } max-w-xs p-2 rounded-lg shadow-md text-sm`}
+                className={`${mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
+                  } max-w-xs p-2 rounded-lg shadow-md text-sm`}
               >
                 <p>{mensagem.conteudo}</p>
                 <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
@@ -325,10 +312,10 @@ const AdvertiseView = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
-      
+
       <button
         className="mb-4 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center gap-2"
-        onClick={handleGoBack} 
+        onClick={handleGoBack}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -336,9 +323,9 @@ const AdvertiseView = () => {
         Voltar
       </button>
 
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-       
+
         <div className="rounded-lg shadow-lg overflow-hidden">
           {ad.imagePaths && ad.imagePaths.length > 0 ? (
             <Carousel showThumbs={false} infiniteLoop showStatus={false} className="rounded-lg">
