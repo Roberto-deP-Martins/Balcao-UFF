@@ -13,4 +13,12 @@ public interface TransacaoRepository extends JpaRepository<TransacaoEntity, Long
 	List<TransacaoEntity> findByVendedorId(Long vendedorId);
 
 	List<TransacaoEntity> findByCompradorId(Long compradorId);
+
+	/**
+	 * Buscar todas as transações relacionadas ao usuário como vendedor ou comprador
+	 * @param vendedorId
+	 * @param compradorId
+	 * @return
+	 */
+    List<TransacaoEntity> findAllByVendedorIdOrCompradorId(Long vendedorId, Long compradorId);
 }

@@ -4,9 +4,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import br.uff.balcao_uff.api.dto.request.TransacaoRequestDTO;
 import br.uff.balcao_uff.api.dto.response.TransacaoResponseDTO;
+import br.uff.balcao_uff.commons.util.exceptions.SameUserException;
+import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.TransacaoEntity;
+import br.uff.balcao_uff.entity.UserEntity;
+import br.uff.balcao_uff.repository.AnuncioRepository;
 import br.uff.balcao_uff.repository.TransacaoRepository;
+import br.uff.balcao_uff.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -14,6 +20,10 @@ import lombok.AllArgsConstructor;
 public class TransacaoService {
 
 	private final TransacaoRepository repository;
+	
+	private final UserRepository userRepository;
+	
+	private final AnuncioRepository anuncioRepository;
 
 	public List<TransacaoResponseDTO> getAll() {
 	    return repository.findAll().stream()
@@ -33,6 +43,41 @@ public class TransacaoService {
 	            .interessadoReview(entity.isCompradorAvaliou())
 	            .build();
 	}
+	
+	public TransacaoResponseDTO create(TransacaoRequestDTO dto) {
+
+	    if (dto.anuncianteId().equals(dto.interessadoId())) {
+	        throw new SameUserException("O anunciante não pode ser o mesmo que o interessado.");
+	    }
+
+	    AnuncioEntity anuncio = anuncioRepository.findById(dto.anuncioId())
+	            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+	    UserEntity anunciante = userRepository.findById(dto.anuncianteId())
+	            .orElseThrow(() -> new RuntimeException("Anunciante não encontrado"));
+	    UserEntity interessado = userRepository.findById(dto.interessadoId())
+	            .orElseThrow(() -> new RuntimeException("Interessado não encontrado"));
+
+	    TransacaoEntity entity = TransacaoEntity.builder()
+	            .anuncio(anuncio)
+	            .vendedor(anunciante)
+	            .comprador(interessado)
+	            .vendedorAvaliou(false)
+	            .compradorAvaliou(false)
+	            .build();
+
+	    repository.save(entity);
+
+	    return transacaoEntityToTransacaoResponseDTO(entity);
+	}
 
 
+
+	public List<TransacaoResponseDTO> findByUserId(Long userId) {
+		
+	    return repository.findAllByVendedorIdOrCompradorId(userId, userId).stream()
+	            .map(this::transacaoEntityToTransacaoResponseDTO)
+	            .toList();
+	}
 }
+
+
