@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ import br.uff.balcao_uff.api.dto.request.CriarConversaComMensagemRequest;
 import br.uff.balcao_uff.api.dto.response.ConversaComMensagemResponse;
 import br.uff.balcao_uff.api.dto.response.ConversaResponseDTO;
 import br.uff.balcao_uff.api.dto.response.MessageResponseInnerDTO;
+import br.uff.balcao_uff.commons.util.exceptions.ConversaNotFoundException;
+import br.uff.balcao_uff.commons.util.exceptions.UsuarioNaoInteressadoException;
+import br.uff.balcao_uff.commons.util.response.ResponseFormatter;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.ConversaEntity;
 import br.uff.balcao_uff.entity.MessageEntity;
@@ -129,6 +133,7 @@ public class ConversaService {
         return new ConversaResponseDTO(
                 conversa.getId(),
                 conversa.getData_criacao(),
+                conversa.isInteressadoFecharNegocio(),
                 mensagens
         );
     }
@@ -149,5 +154,26 @@ public class ConversaService {
                 .dataEnvio(dataEnvio)
                 .isRead(mensagem.isRead())
                 .build();
+    }
+
+    /**
+     * Atualiza o campo interessado_fechar_negocio para true.
+     *
+     * @param conversaId O ID da conversa que será atualizada.
+     * @param userId O ID do usuário autenticado.
+     * @return Map contendo a resposta formatada.
+     */
+    public Map<String, Object> atualizarInteressadoFecharNegocio(Long conversaId, Long userId) {
+        ConversaEntity conversa = conversaRepository.findById(conversaId)
+                .orElseThrow(() -> new ConversaNotFoundException("Conversa não encontrada."));
+
+        if (!conversa.getInteressado().getId().equals(userId)) {
+            throw new UsuarioNaoInteressadoException("Usuário não é o interessado desta conversa.");
+        }
+
+        conversa.setInteressadoFecharNegocio(true);
+        conversaRepository.save(conversa);
+
+        return ResponseFormatter.createSuccessResponse("O campo interessado_fechar_negocio foi atualizado com sucesso.");
     }
 }

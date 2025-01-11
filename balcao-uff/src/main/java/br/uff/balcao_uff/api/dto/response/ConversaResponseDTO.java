@@ -11,5 +11,6 @@ import lombok.Data;
 public class ConversaResponseDTO {
     private Long id;
     private LocalDateTime dataCriacao;
+    private boolean interessadoFecharNegocio;
     private List<MessageResponseInnerDTO> mensagens;
 }

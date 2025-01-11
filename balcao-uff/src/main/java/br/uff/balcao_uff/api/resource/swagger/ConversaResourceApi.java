@@ -1,12 +1,14 @@
 package br.uff.balcao_uff.api.resource.swagger;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 
 import br.uff.balcao_uff.api.dto.request.CriarConversaComMensagemRequest;
 import br.uff.balcao_uff.api.dto.response.ConversaComMensagemResponse;
 import br.uff.balcao_uff.api.dto.response.ConversaResponseDTO;
+import br.uff.balcao_uff.api.resource.impl.ConversaResource;
 import io.swagger.v3.oas.annotations.Operation;
 
 /**
@@ -40,4 +42,16 @@ public interface ConversaResourceApi {
      */
     @Operation(summary = "Buscar conversas por anúncio", description = "Retorna todas as conversas relacionadas a um anúncio, filtradas pelo papel do usuário (anunciante ou interessado).")
     ResponseEntity<List<ConversaResponseDTO>> buscarConversasPorAnuncio(Long anuncioId);
+    
+    /**
+     * Atualiza o campo interessado_fechar_negocio para true.
+     * 
+     * Este método permite que o usuário interessado marque a conversa como fechada, indicando que ele deseja
+     * fechar o negócio. A atualização é feita apenas se o usuário for o interessado da conversa.
+     * 
+     * @param conversaId O ID da conversa que será atualizada.
+     * @return ResponseEntity com a resposta formatada.
+     */
+    @Operation(summary = "Atualizar interessado_fechar_negocio", description = "Atualiza o campo interessado_fechar_negocio para true, marcando a conversa como fechada pelo interessado.")
+    ResponseEntity<Map<String, Object>> atualizarInteressadoFecharNegocio(Long conversaId);
 }

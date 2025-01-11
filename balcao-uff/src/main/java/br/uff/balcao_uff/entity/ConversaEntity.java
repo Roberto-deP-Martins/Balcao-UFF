@@ -37,6 +37,9 @@ public class ConversaEntity implements Serializable {
     
     @JsonProperty(value="data_criacao")
     private LocalDateTime data_criacao;
+    
+    @JsonProperty(value = "interessado_fechar_negocio")
+    private boolean interessadoFecharNegocio;
 
     @ManyToOne
     @JoinColumn(name = "anuncio_id", referencedColumnName = "id", nullable = false)
