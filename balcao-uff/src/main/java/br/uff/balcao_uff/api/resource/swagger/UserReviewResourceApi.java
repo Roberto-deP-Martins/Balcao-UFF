@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserReviewResourceApi {
 
@@ -23,7 +24,7 @@ public interface UserReviewResourceApi {
             }
     )
     @PostMapping("/reviews")
-    ResponseEntity<Void> addReview(
+    public ResponseEntity<Map<String, Object>> addReview(
             @RequestBody(description = "Dados da avaliação a ser criada") UserReviewRequestDTO reviewRequestDTO
     );
 
