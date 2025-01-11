@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import br.uff.balcao_uff.api.dto.request.TransacaoRequestDTO;
 import br.uff.balcao_uff.api.dto.response.TransacaoResponseDTO;
 import br.uff.balcao_uff.commons.util.exceptions.SameUserException;
+import br.uff.balcao_uff.commons.util.exceptions.TransactionUpdateException;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.TransacaoEntity;
 import br.uff.balcao_uff.entity.UserEntity;
@@ -78,6 +79,14 @@ public class TransacaoService {
 	            .map(this::transacaoEntityToTransacaoResponseDTO)
 	            .toList();
 	}
+	
+	public void updateReviewStatus(Long userId, Long otherUserId) {
+        try {
+            repository.updateTransactionReviewStatus(userId, otherUserId);
+        } catch (Exception ex) {
+            throw new TransactionUpdateException("Erro ao atualizar os status de avaliação da transação.");
+        }
+    }
 }
 
 
