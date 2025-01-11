@@ -64,5 +64,21 @@ public class GlobalExceptionHandler {
                                                       ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    
+    @ExceptionHandler(ConversaNotFoundException.class)
+    public ResponseEntity<Object> handleConversaNotFoundException(ConversaNotFoundException ex) {
+        Map<String, Object> body = createResponseBody(HttpStatus.NOT_FOUND, 
+                                                      "Conversa Não Encontrada", 
+                                                      ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UsuarioNaoInteressadoException.class)
+    public ResponseEntity<Object> handleUsuarioNaoInteressadoException(UsuarioNaoInteressadoException ex) {
+        Map<String, Object> body = createResponseBody(HttpStatus.FORBIDDEN, 
+                                                      "Acesso Negado", 
+                                                      ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
 
 }
