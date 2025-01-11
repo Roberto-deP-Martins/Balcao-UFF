@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -89,7 +90,8 @@ public AnuncioResponseDTO save(AnuncioRequestDTO anuncioRequestDTO) {
 @Transactional
 public void update(AnuncioRequestDTO anuncioRequestDTO) {
     AnuncioEntity existingAnuncio = anuncioRepository.findById(anuncioRequestDTO.getId())
-            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+            .filter(anuncio -> anuncio.getDtDelete() == null)
+            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado ou já excluído"));
 
     updateIfNotNull(existingAnuncio::setTitle, anuncioRequestDTO.getTitle());
     updateIfNotNull(existingAnuncio::setDescription, anuncioRequestDTO.getDescription());
@@ -157,7 +159,7 @@ public void update(AnuncioRequestDTO anuncioRequestDTO) {
     }
 
     /**
-     * Exclui um anúncio pelo ID.
+     * Exclui um anúncio logicamente pelo ID.
      *
      * @param id o identificador do anúncio a ser excluído.
      * @throws RuntimeException se o anúncio não for encontrado.
@@ -166,8 +168,11 @@ public void update(AnuncioRequestDTO anuncioRequestDTO) {
     public void deleteById(Long id) {
         AnuncioEntity existingAnuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-        anuncioRepository.delete(existingAnuncio);
+        
+        existingAnuncio.setDtDelete(new Date());
+        anuncioRepository.save(existingAnuncio);
     }
+
 
     /**
      * Converte uma entidade de anúncio em um DTO de resposta.

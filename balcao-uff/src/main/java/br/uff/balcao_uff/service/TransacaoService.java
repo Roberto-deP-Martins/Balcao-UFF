@@ -1,5 +1,6 @@
 package br.uff.balcao_uff.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.repository.AnuncioRepository;
 import br.uff.balcao_uff.repository.TransacaoRepository;
 import br.uff.balcao_uff.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -45,6 +47,7 @@ public class TransacaoService {
 	            .build();
 	}
 	
+	@Transactional
 	public TransacaoResponseDTO create(TransacaoRequestDTO dto) {
 
 	    if (dto.anuncianteId().equals(dto.interessadoId())) {
@@ -67,6 +70,9 @@ public class TransacaoService {
 	            .build();
 
 	    repository.save(entity);
+
+	    anuncio.setDtDelete(new Date());
+	    anuncioRepository.save(anuncio);
 
 	    return transacaoEntityToTransacaoResponseDTO(entity);
 	}
