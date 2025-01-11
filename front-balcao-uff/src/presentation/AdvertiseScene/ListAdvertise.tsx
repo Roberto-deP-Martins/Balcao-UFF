@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import AdvertiseCard from "../../components/AdvertiseCard";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";  // Importando o Link para navegação
 
 const ListAdvertise = () => {
   const [advertises, setAdvertises] = useState<any[]>([]);
   const [category, setCategory] = useState<string>("");
   const [isNearby, setIsNearby] = useState<boolean>(false); // Estado para controlar o checkbox de anúncios próximos
+  const [showNearby, setShowNearby] = useState<boolean>(false); // Estado para controlar se os anúncios próximos estão sendo exibidos
 
   useEffect(() => {
     fetchAdvertises();
-  }, [isNearby]);
+  }, []);
 
   const fetchAdvertises = async () => {
     try {
@@ -65,6 +66,12 @@ const ListAdvertise = () => {
   };
 
   const handleSearchByLocation = async () => {
+    if (showNearby) {
+      fetchAdvertises();
+      setShowNearby(false);
+      return;
+    }
+
     if (!navigator.geolocation) {
       console.error("Geolocalização não é suportada pelo seu navegador.");
       return;
@@ -90,6 +97,7 @@ const ListAdvertise = () => {
 
         const data = await response.json();
         setAdvertises(data);
+        setShowNearby(true);
       } catch (error) {
         console.error("Erro ao buscar anúncios próximos:", error);
       }
@@ -128,25 +136,15 @@ const ListAdvertise = () => {
         </Link>
       </div>
 
-      {/* Checkbox de "Anúncios Próximos" */}
+      {/* Botão de "Buscar Anúncios Próximos" */}
       <div className="mb-4 flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="nearby"
-          className="form-checkbox h-5 w-5 text-blue-600"
-          checked={isNearby}
-          onChange={(e) => {
-            setIsNearby(e.target.checked);
-            if (e.target.checked) {
-              handleSearchByLocation();
-            } else {
-              fetchAdvertises();
-            }
-          }}
-        />
-        <label htmlFor="nearby" className="text-gray-700">
-          Anúncios Próximos
-        </label>
+        <button
+          onClick={handleSearchByLocation}
+          className="w-10 h-10 flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+          >
+          <FaMapMarkerAlt />
+        </button>
+          <span>{showNearby ? "Todos os anúncios" : "Buscar Anúncios Próximos"}</span>
       </div>
 
       {advertises.length > 0 ? (

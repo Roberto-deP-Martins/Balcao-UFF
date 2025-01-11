@@ -44,6 +44,10 @@ spring:
     security:
       token:
         secret: ${JWT.SECRET:my-secret-key}  # Defina sua chave secreta para JWT
+  servlet:
+    multipart:
+      max-file-size: 10MB  # Tamanho máximo para cada arquivo
+      max-request-size: 10MB  # Tamanho máximo da requisição (incluindo arquivos)
 
 server:
   port: 8080

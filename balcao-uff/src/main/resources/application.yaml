@@ -35,6 +35,11 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: id
 
+  servlet:
+    multipart:
+      max-file-size: 10MB  # Tamanho máximo para cada arquivo
+      max-request-size: 10MB  # Tamanho máximo da requisição (incluindo arquivos)
+
 server:
   port: 8080
   error:
