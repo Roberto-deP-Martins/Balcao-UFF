@@ -56,5 +56,13 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+    
+    @ExceptionHandler(TransactionUpdateException.class)
+    public ResponseEntity<Object> handleTransactionUpdateException(TransactionUpdateException ex) {
+        Map<String, Object> body = createResponseBody(HttpStatus.INTERNAL_SERVER_ERROR, 
+                                                      "Internal Server Error", 
+                                                      ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }
