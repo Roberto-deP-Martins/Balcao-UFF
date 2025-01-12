@@ -1,14 +1,14 @@
 package br.uff.balcao_uff.commons.util.exceptions;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -79,6 +79,14 @@ public class GlobalExceptionHandler {
                                                       "Acesso Negado", 
                                                       ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(NegocioNaoAceitoException.class)
+    public ResponseEntity<Object> handleNegocioNaoAceitoException(NegocioNaoAceitoException ex) {
+        Map<String, Object> body = createResponseBody(HttpStatus.FORBIDDEN,
+                                                        "Interessado não quer fechar negócio",
+                                                      ex.getMessage());
+    return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
 }

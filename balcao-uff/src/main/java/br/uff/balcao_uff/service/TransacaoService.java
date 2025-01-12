@@ -2,7 +2,12 @@ package br.uff.balcao_uff.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import br.uff.balcao_uff.commons.util.exceptions.ConversaNotFoundException;
+import br.uff.balcao_uff.commons.util.exceptions.NegocioNaoAceitoException;
+import br.uff.balcao_uff.entity.ConversaEntity;
+import br.uff.balcao_uff.repository.*;
 import org.springframework.stereotype.Service;
 
 import br.uff.balcao_uff.api.dto.request.TransacaoRequestDTO;
@@ -12,9 +17,6 @@ import br.uff.balcao_uff.commons.util.exceptions.TransactionUpdateException;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.TransacaoEntity;
 import br.uff.balcao_uff.entity.UserEntity;
-import br.uff.balcao_uff.repository.AnuncioRepository;
-import br.uff.balcao_uff.repository.TransacaoRepository;
-import br.uff.balcao_uff.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -27,6 +29,10 @@ public class TransacaoService {
 	private final UserRepository userRepository;
 	
 	private final AnuncioRepository anuncioRepository;
+
+	private final ConversaRepository conversaRepository;
+
+	private final UserReviewRepository userReviewRepository;
 
 	public List<TransacaoResponseDTO> getAll() {
 	    return repository.findAll().stream()
@@ -50,33 +56,67 @@ public class TransacaoService {
 	@Transactional
 	public TransacaoResponseDTO create(TransacaoRequestDTO dto) {
 
-	    if (dto.anuncianteId().equals(dto.interessadoId())) {
-	        throw new SameUserException("O anunciante não pode ser o mesmo que o interessado.");
-	    }
+		Optional<ConversaEntity> conversaByIds = getConversaEntity(dto);
+		verificarSeConversaExiste(conversaByIds);
+		verificarSeAnuncianteIgualInteressado(dto);
+		verificarSeInteressadoQuerFecharNegocio(conversaByIds);
 
-	    AnuncioEntity anuncio = anuncioRepository.findById(dto.anuncioId())
+		AnuncioEntity anuncio = anuncioRepository.findById(dto.anuncioId())
 	            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-	    UserEntity anunciante = userRepository.findById(dto.anuncianteId())
+		UserEntity anunciante = userRepository.findById(dto.anuncianteId())
 	            .orElseThrow(() -> new RuntimeException("Anunciante não encontrado"));
-	    UserEntity interessado = userRepository.findById(dto.interessadoId())
+		UserEntity interessado = userRepository.findById(dto.interessadoId())
 	            .orElseThrow(() -> new RuntimeException("Interessado não encontrado"));
 
-	    TransacaoEntity entity = TransacaoEntity.builder()
-	            .anuncio(anuncio)
-	            .vendedor(anunciante)
-	            .comprador(interessado)
-	            .vendedorAvaliou(false)
-	            .compradorAvaliou(false)
-	            .build();
+		TransacaoEntity entity = getTransacaoEntity(dto, anuncio, anunciante, interessado);
 
-	    repository.save(entity);
+		repository.save(entity);
 
-	    anuncio.setDtDelete(new Date());
-	    anuncioRepository.save(anuncio);
+		anuncio.setDtDelete(new Date());
+		anuncioRepository.save(anuncio);
 
 	    return transacaoEntityToTransacaoResponseDTO(entity);
 	}
 
+	private TransacaoEntity getTransacaoEntity(TransacaoRequestDTO dto, AnuncioEntity anuncio, UserEntity anunciante, UserEntity interessado) {
+		TransacaoEntity entity = TransacaoEntity.builder()
+	            .anuncio(anuncio)
+	            .vendedor(anunciante)
+	            .comprador(interessado)
+	            .build();
+
+		boolean anuncianteReview = userReviewRepository.existsByReviewerIdAndReviewedId(dto.anuncianteId(), dto.interessadoId());
+        entity.setVendedorAvaliou(anuncianteReview);
+
+		boolean interessadoReview = userReviewRepository.existsByReviewerIdAndReviewedId(dto.interessadoId(), dto.anuncianteId());
+        entity.setCompradorAvaliou(interessadoReview);
+
+		return entity;
+	}
+
+	private Optional<ConversaEntity> getConversaEntity(TransacaoRequestDTO dto) {
+        return conversaRepository.findConversaByIds(dto.anuncioId(),
+                                                                                    dto.interessadoId(),
+                                                                                    dto.anuncianteId());
+	}
+
+	private static void verificarSeInteressadoQuerFecharNegocio(Optional<ConversaEntity> conversaByIds) {
+		if(!conversaByIds.get().isInteressadoFecharNegocio()){
+			throw new NegocioNaoAceitoException("O interessado não quer fechar negócio ainda.");
+		}
+	}
+
+	private static void verificarSeAnuncianteIgualInteressado(TransacaoRequestDTO dto) {
+		if (dto.anuncianteId().equals(dto.interessadoId())) {
+			throw new SameUserException("O anunciante não pode ser o mesmo que o interessado.");
+		}
+	}
+
+	private static void verificarSeConversaExiste(Optional<ConversaEntity> conversaByIds) {
+		if(conversaByIds.isEmpty()){
+			throw new ConversaNotFoundException("Conversa não encontrada");
+		}
+	}
 
 
 	public List<TransacaoResponseDTO> findByUserId(Long userId) {
