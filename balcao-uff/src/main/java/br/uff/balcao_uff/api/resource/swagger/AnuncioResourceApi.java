@@ -2,6 +2,7 @@ package br.uff.balcao_uff.api.resource.swagger;
 
 import java.util.List;
 
+import br.uff.balcao_uff.api.dto.response.AnuncioResponsePerfilDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,4 +36,7 @@ public interface AnuncioResourceApi {
 
 	@Operation(summary = "NÃO IMPLEMENTADA AINDA")
 	public ResponseEntity<List<AnuncioResponseDTO>> buscaAvancada(AnuncioPesquisaAvancadaRequestDTO request);
+
+	@Operation(summary = "Buscar anuncios por id do usuário")
+	public ResponseEntity<List<AnuncioResponsePerfilDTO>> getAnunciosByUserId(Long userId);
 }

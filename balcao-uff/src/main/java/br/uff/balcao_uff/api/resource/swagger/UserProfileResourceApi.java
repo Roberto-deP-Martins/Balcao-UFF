@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -32,4 +33,15 @@ public interface UserProfileResourceApi {
     )
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDTO>> getALl();
+
+    @Operation(
+            summary = "Obter usuário",
+            description = "Retorna usuário cadastrados que podem criar anúncios",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuário retornado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+            }
+    )
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserResponseDTO> getById(@PathVariable Long userId);
 }

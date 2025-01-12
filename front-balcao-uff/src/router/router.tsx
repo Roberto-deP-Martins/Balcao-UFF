@@ -1,10 +1,11 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import Home from '../presentation/Home/Home';
 import ListAdvertise from '../presentation/AdvertiseScene/ListAdvertise';
-import CreateAdvertise from '../presentation/AdvertiseScene/CreateAdvertise'; // Importe a nova tela
+import CreateAdvertise from '../presentation/AdvertiseScene/CreateAdvertise';
 import Login from '../presentation/Login/Login';
 import AdvertiseView from '../presentation/AdvertiseView/AdvertiseView';
 import Perfil from '../presentation/Perfil/Perfil';
+import UserList from '../presentation/User/UserTable';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
         path: "create-advertise",
         element: <CreateAdvertise />,
       },
+      {
+        path: "users",
+        element: <UserList/>,
+      }
     ],
   },
   {
@@ -34,7 +39,7 @@ export const router = createBrowserRouter([
     element: <AdvertiseView />,
   },
   {
-    path: "/perfil",
+    path: "/perfil/:idUser",
     element: <Perfil />,
   }
 ]);

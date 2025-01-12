@@ -36,8 +36,13 @@ public class UserProfileResource implements UserProfileResourceApi {
         return ResponseEntity.ok(userProfile);
     }
 
-
+    @Override
     public ResponseEntity<List<UserResponseDTO>> getALl(){
         return ResponseEntity.ok(userService.getAll());
+    }
+
+    @Override
+    public ResponseEntity<UserResponseDTO> getById(Long userId) {
+        return ResponseEntity.ok(userService.getById(userId));
     }
 }

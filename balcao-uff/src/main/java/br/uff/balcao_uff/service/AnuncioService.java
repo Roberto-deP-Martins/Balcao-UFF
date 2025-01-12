@@ -1,23 +1,9 @@
 package br.uff.balcao_uff.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import br.uff.balcao_uff.api.dto.request.AnuncioPesquisaAvancadaRequestDTO;
 import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
+import br.uff.balcao_uff.api.dto.response.AnuncioResponsePerfilDTO;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.AnuncioImageEntity;
 import br.uff.balcao_uff.entity.LocationEntity;
@@ -28,6 +14,20 @@ import br.uff.balcao_uff.repository.LocationRepository;
 import br.uff.balcao_uff.repository.UserRepository;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Serviço responsável por gerenciar operações relacionadas aos anúncios,
@@ -293,5 +293,15 @@ public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, Li
     public List<AnuncioResponseDTO> findNearby(double lat, double lng, double radius) {
         List<AnuncioEntity> anuncios = anuncioRepository.findNearby(lat, lng, radius);
         return anuncios.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    public List<AnuncioResponsePerfilDTO> findAnunciosByUserId(Long userId) {
+        List<AnuncioEntity> anuncios = anuncioRepository.findByUserId(userId);
+        return anuncios.stream().map(anuncio -> AnuncioResponsePerfilDTO.builder()
+                .title(anuncio.getTitle())
+                .category(anuncio.getCategory())
+                .location(anuncio.getLocation() != null ? anuncio.getLocation().getAddress() : "Endereço não informado")
+                .price(anuncio.getPrice())
+                .build()).collect(Collectors.toList());
     }
 }

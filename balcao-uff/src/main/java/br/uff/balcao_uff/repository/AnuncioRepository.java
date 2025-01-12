@@ -67,4 +67,6 @@ public interface AnuncioRepository extends JpaRepository<AnuncioEntity, Long> {
 	 */
     @Query(CALCULO_DISTANCIA)
     List<AnuncioEntity> findNearby(@Param("lat") double lat, @Param("lng") double lng, @Param("radius") double radius);
+
+    List<AnuncioEntity> findByUserId(Long userId);
 }
