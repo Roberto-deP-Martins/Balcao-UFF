@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import br.uff.balcao_uff.api.dto.response.ReputationResponseDTO;
 import org.springframework.stereotype.Service;
 
 import br.uff.balcao_uff.api.dto.request.UserReviewRequestDTO;
@@ -59,14 +60,18 @@ public class UserReviewService {
         return ResponseFormatter.createSuccessResponse("Avaliação adicionada com sucesso!");
     }
 
-    public double calculateReputation(Long userId) {
+    public ReputationResponseDTO calculateReputation(Long userId) {
         List<UserReviewEntity> reviews = userReviewRepository.findByReviewedId(userId);
         if (reviews.isEmpty()) {
-            return 0.0; // Sem avaliações
+            return ReputationResponseDTO.builder()
+                    .reputation(0.0)
+                    .build();
         }
 
         double sum = reviews.stream().mapToInt(UserReviewEntity::getRating).sum();
-        return sum / reviews.size();
+        return ReputationResponseDTO.builder()
+                .reputation(sum / reviews.size())
+                .build();
     }
 
     public List<UserReviewResponseDTO> getReviewsByUser(Long userId) {

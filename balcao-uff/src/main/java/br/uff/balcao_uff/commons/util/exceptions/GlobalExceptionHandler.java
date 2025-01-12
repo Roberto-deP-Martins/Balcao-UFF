@@ -89,4 +89,11 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
+        Map<String, Object> body = createResponseBody(HttpStatus.FORBIDDEN,
+                                                    "Usuário não encontrado",
+                                                      ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
 }

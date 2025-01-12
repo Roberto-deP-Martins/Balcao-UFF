@@ -1,22 +1,17 @@
 package br.uff.balcao_uff.api.resource.impl;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.uff.balcao_uff.api.dto.request.UserReviewRequestDTO;
+import br.uff.balcao_uff.api.dto.response.ReputationResponseDTO;
 import br.uff.balcao_uff.api.dto.response.UserReviewResponseDTO;
 import br.uff.balcao_uff.api.resource.swagger.UserReviewResourceApi;
 import br.uff.balcao_uff.service.UserReviewService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,8 +34,8 @@ public class UserReviewResource implements UserReviewResourceApi {
 
 
     @GetMapping("/user/{userId}/reputation")
-    public ResponseEntity<Double> getUserReputation(@PathVariable Long userId) {
-        double reputation = userReviewService.calculateReputation(userId);
+    public ResponseEntity<ReputationResponseDTO> getUserReputation(@PathVariable Long userId) {
+        ReputationResponseDTO reputation = userReviewService.calculateReputation(userId);
         return ResponseEntity.ok(reputation);
     }
 

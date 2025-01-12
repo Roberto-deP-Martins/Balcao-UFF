@@ -1,6 +1,7 @@
 package br.uff.balcao_uff.api.resource.swagger;
 
 import br.uff.balcao_uff.api.dto.request.UserReviewRequestDTO;
+import br.uff.balcao_uff.api.dto.response.ReputationResponseDTO;
 import br.uff.balcao_uff.api.dto.response.UserReviewResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -50,7 +51,7 @@ public interface UserReviewResourceApi {
             }
     )
     @GetMapping("/reviews/user/{userId}/reputation")
-    ResponseEntity<Double> getUserReputation(
+    public ResponseEntity<ReputationResponseDTO> getUserReputation(
             @PathVariable Long userId
     );
 }
