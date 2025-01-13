@@ -115,12 +115,55 @@ const AdvertiseView = () => {
     }
   };
 
+  const [aceitarNegocio, setAceitarNegocio] = useState(false);
+
+  const handleAceitarNegocio = async (interessadoId) => {
+    if(aceitarNegocio) return;
+
+    const url = 'http://localhost:8080/transactions';
+    console.log(interessadoId, id, userId)
+    const body = JSON.stringify({
+        anuncioId: id,
+        anuncianteId: userId,
+        interessadoId: interessadoId,
+    });
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: body,
+    };
+
+    try {
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Detalhes do erro:', errorData); 
+            throw new Error(`Erro: ${errorData.message || 'Falha ao criar transação'}`);
+        }
+
+        const data = await response.json();
+        setAceitarNegocio(true)
+        console.log('Transação criada com sucesso:', data);
+        return data; 
+    } catch (error) {
+        console.error('Erro ao criar transação:', error);
+        throw error; // Repropaga o erro
+    }
+}
+
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getChats = async (notInit = false) => {
     const result = await getConversas()
     setListConversation(result)
     if (result.length > 0 && isNormalUser) {
       setSelectedConversation(result[0])
+      console.log(result[0])
       setIndexSelectedConversation(0)
     }
     if (!isNormalUser && notInit) {
@@ -154,6 +197,35 @@ const AdvertiseView = () => {
     setIsWriting(false);
   };
 
+  const [setFecharNegocio, setFecharNegocioLoading] = useState(false);
+
+  const handleFecharNegocio = async () => {
+      const url = `http://localhost:8080/conversas/fechar-negocio/${selectedConversation.id}`;
+    
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      };
+    
+      try {
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: headers,
+        });
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Erro ao fechar negócio:", errorData);
+          return;
+        }
+        setFecharNegocioLoading(true)
+        const data = await response.json();
+        console.log("Negócio fechado com sucesso:", data);
+      } catch (error) {
+        console.error("Erro na requisição:", error);
+      }
+  };
+
   const handleCommentSubmitInit = async () => {
     const result = await initConversa(comment)
     if (result?.conversaId) {
@@ -185,12 +257,24 @@ const AdvertiseView = () => {
                 </div>
               ))}
             </div>
-            <button
-              className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
-              onClick={() => { setSelectedConversation(conversa); setIndexSelectedConversation(index) }}
-            >
-              Visualizar Conversa
-            </button>
+
+            <div className='width-full flex gap-2 justify-center'>
+              <button
+                className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
+                onClick={() => { setSelectedConversation(conversa); setIndexSelectedConversation(index) }}
+              >
+                Visualizar Conversa
+              </button>
+              {
+                conversa.interessadoFecharNegocio &&
+                  <button
+                    className="mt-3 bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition"
+                    onClick={() => { handleAceitarNegocio(conversa?.mensagens[0].senderId) }}  
+                  >
+                    {!aceitarNegocio ? "Aceitar Negócio" : "Negocio Fechado"}
+                  </button> 
+              }
+            </div>
           </div>
         ))}
       </div>
@@ -246,6 +330,18 @@ const AdvertiseView = () => {
           >
             Enviar
           </button>
+          {isNormalUser && !selectedConversation?.interessadoFecharNegocio && !setFecharNegocio ?
+            <button
+              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+              onClick={handleFecharNegocio}
+            >
+              Fechar Negocio
+            </button> : (
+              <div className="bg-blue-500 text-white py-2 px-4 rounded-lg ">
+                Esperando Resposta!
+              </div>
+            )
+          } 
         </div>
       </div>
     );
