@@ -1,7 +1,14 @@
 import { useState } from "react";
+import TextField from '@mui/material/TextField';
 import Maps from "../../components/Maps";
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom'; // Importando o useNavigate
+import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import SendIcon from '@mui/icons-material/Send';
+import CancelIcon from '@mui/icons-material/Cancel';
+import Stack from '@mui/material/Stack';
+
+
 
 const CreateAdvertise = () => {
     const [title, setTitle] = useState<string>("");
@@ -105,49 +112,82 @@ const CreateAdvertise = () => {
         }
     };
 
-
     return (
-        <div className="w-screen h-full p-4">
-            <div className="text-xl font-semibold mb-4">
+        <div className="w-screen h-full p-6 bg-gray-50">
+            <div className="text-2xl font-semibold mb-6">
                 Criar novo Anúncio
             </div>
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded shadow-md">
                 {error && <div className="text-red-500">{error}</div>}
-                <input
-                    type="text"
-                    placeholder="Título"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                />
-                <input
-                    type="text"
-                    placeholder="Descrição"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                />
-                <input
-                    type="text"
-                    placeholder="Categoria"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                />
-                <input
-                    type="number"
-                    placeholder="Preço"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : "")}
-                    className="w-full p-2 border border-gray-300 rounded"
-                />
-                <input
-                    type="text"
-                    placeholder="Informações de contato"
-                    value={contactInfo}
-                    onChange={(e) => setContactInfo(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <TextField
+                        id="title"
+                        label="Título"
+                        variant="outlined"
+                        fullWidth
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                    <TextField
+                        id="description"
+                        label="Descrição"
+                        variant="outlined"
+                        fullWidth
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                    <TextField
+                        id="category"
+                        label="Categoria"
+                        variant="outlined"
+                        fullWidth
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                    />
+                    <TextField
+                        id="price"
+                        label="Preço"
+                        variant="outlined"
+                        type="number"
+                        fullWidth
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : "")}
+                    />
+                    <TextField
+                        id="contactInfo"
+                        label="Informações de contato"
+                        variant="outlined"
+                        fullWidth
+                        value={contactInfo}
+                        onChange={(e) => setContactInfo(e.target.value)}
+                    />
+                </div>
+
+                <div className="text-xl font-semibold mb-4 text-left">
+                    Selecionar Imagens
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <input
+                        type="file"
+                        onChange={(e) => setImage1(e.target.files ? e.target.files[0] : null)}
+                        className="p-2 border border-gray-300 rounded"
+                        accept="image/*"
+                    />
+                    <input
+                        type="file"
+                        onChange={(e) => setImage2(e.target.files ? e.target.files[0] : null)}
+                        className="p-2 border border-gray-300 rounded"
+                        accept="image/*"
+                    />
+                    <input
+                        type="file"
+                        onChange={(e) => setImage3(e.target.files ? e.target.files[0] : null)}
+                        className="p-2 border border-gray-300 rounded"
+                        accept="image/*"
+                    />
+                </div>
 
                 <div className="text-xl font-semibold mb-4 text-left">
                     Endereço
@@ -160,35 +200,27 @@ const CreateAdvertise = () => {
                         setAddress(address);
                     }}
                 />
-                <div className="text-xl font-semibold mb-4 text-left">
-                    Selecionar Imagens
-                </div>
 
-                <input
-                    type="file"
-                    onChange={(e) => setImage1(e.target.files ? e.target.files[0] : null)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    accept="image/*"
-                />
-                <input
-                    type="file"
-                    onChange={(e) => setImage2(e.target.files ? e.target.files[0] : null)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    accept="image/*"
-                />
-                <input
-                    type="file"
-                    onChange={(e) => setImage3(e.target.files ? e.target.files[0] : null)}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    accept="image/*"
-                />
+                <Stack direction="row" spacing={2} justifyContent="flex-end">
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        endIcon={<SendIcon />}
+                        color="primary"
+                    >
+                        Salvar
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<CancelIcon />}
+                        color="error"
+                        onClick={() => navigate('/advertises')}
+                    >
+                        Cancelar
+                    </Button>
+                </Stack>
 
-                <button
-                    type="submit"
-                    className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    Salvar
-                </button>
+
             </form>
         </div>
     );

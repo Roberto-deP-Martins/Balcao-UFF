@@ -1,6 +1,12 @@
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Carousel } from "react-responsive-carousel";
 import { useNavigate } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import Divider from '@mui/material/Divider'; // Importando o componente Divider do Material-UI
 
 interface Ad {
   imagePaths: string[];
@@ -19,14 +25,26 @@ const AdvertiseCard = ({ ad }: { ad: Ad }) => {
   };
 
   return (
-    <div className="border border-gray-300 rounded-lg shadow-lg bg-white hover:shadow-xl transition-shadow duration-300 ease-in-out overflow-hidden max-w-md mx-auto">
+    <Card sx={{ 
+      maxWidth: 345, 
+      margin: 'auto', 
+      boxShadow: 3, 
+      borderRadius: 2, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%' // Faz os cards terem a mesma altura
+    }}>
       {ad.imagePaths && ad.imagePaths.length > 0 ? (
-        <Carousel showThumbs={false} infiniteLoop useKeyboardArrows showStatus={false} autoPlay className="relative">
+        <Carousel showThumbs={false} infiniteLoop useKeyboardArrows showStatus={false} autoPlay>
           {ad.imagePaths.map((path, index) => {
             const fileName = path.substring(path.lastIndexOf('/') + 1);
             return (
-              <div key={index} className="relative">
-                <img src={`http://localhost:8080/anuncioImages/image/${fileName}`} alt={`Imagem ${index + 1}`} className="w-full h-56 object-cover" />
+              <div key={index}>
+                <img
+                  src={`http://localhost:8080/anuncioImages/image/${fileName}`}
+                  alt={`Imagem ${index + 1}`}
+                  className="w-full h-56 object-cover"
+                />
               </div>
             );
           })}
@@ -37,31 +55,43 @@ const AdvertiseCard = ({ ad }: { ad: Ad }) => {
         </div>
       )}
 
-      <div className="p-4">
-        <p className="text-left text-gray-800 text-xl font-bold mb-2">
-          R$ {ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-        </p>
-        <h3 className="text-left text-lg text-gray-800 mb-2">{ad.title}</h3>
-        <div className="flex pt-2">
-          <p className="text-left text-sm text-gray-700 font-bold">Descrição: <span className="text-left text-sm text-gray-700 font-normal">{ad.description}</span></p>
-        </div>
-        <div className="flex pt-2">
-          <p className="text-left text-sm text-gray-700 font-bold">Contato: <span className="text-left text-sm text-gray-700 font-normal">{ad.contactInfo}</span></p>
-        </div>
-        <div className="flex pt-2">
-          <p className="text-left text-sm text-gray-700 font-bold">Localização: <span className="text-left text-sm text-gray-700 font-normal">{ad.location}</span></p>
-        </div>
-      </div>
+      <CardContent sx={{ flex: 1 }}>
+        <Typography gutterBottom variant="h5" component="div" sx={{ textAlign: 'left' }}>
+          {ad.title}
+        </Typography>
+        
+        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'left', mb: 1 }}>
+          {ad.description}
+        </Typography>
 
-      <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
-        <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition">
-          Contatar Vendedor
-        </button>
-        <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 transition" onClick={() => handleVerMais()}>
+        <Divider sx={{ marginY: 1 }} /> {/* Divisória */}
+        
+        <Typography variant="h6" component="p" color="primary" sx={{ textAlign: 'left' }}>
+          R$ {ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+        </Typography>
+        
+        <Divider sx={{ marginY: 1 }} /> {/* Divisória */}
+        
+        <Typography variant="body2" sx={{ textAlign: 'left' }}>
+          Contato: {ad.contactInfo}
+        </Typography>
+        <Typography variant="body2" sx={{ textAlign: 'left' }}>
+          Localização: {ad.location}
+        </Typography>
+      </CardContent>
+
+      <CardActions>
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={handleVerMais}
+          sx={{ alignSelf: 'flex-end' }} // Botão alinhado à direita
+        >
           Ver Mais
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 
