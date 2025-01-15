@@ -45,7 +45,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/anuncios").authenticated()
                         .requestMatchers(HttpMethod.GET, "/anuncios").authenticated()
                         .requestMatchers(HttpMethod.POST, "/anuncios/category").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/anuncios/delete").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/anuncios/delete").authenticated()
                         .requestMatchers(HttpMethod.GET, "/anuncioImages/image/**").permitAll()
 
                         /**
