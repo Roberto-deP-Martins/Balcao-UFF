@@ -117,7 +117,7 @@ const AdvertiseView = () => {
 
   const [aceitarNegocio, setAceitarNegocio] = useState(false);
 
-  const handleAceitarNegocio = async (interessadoId) => {
+  const handleAceitarNegocio = async (interessadoId: number) => {
     if(aceitarNegocio) return;
 
     const url = 'http://localhost:8080/transactions';
@@ -200,6 +200,7 @@ const AdvertiseView = () => {
   const [setFecharNegocio, setFecharNegocioLoading] = useState(false);
 
   const handleFecharNegocio = async () => {
+      if (!selectedConversation) return;
       const url = `http://localhost:8080/conversas/fechar-negocio/${selectedConversation.id}`;
     
       const headers = {

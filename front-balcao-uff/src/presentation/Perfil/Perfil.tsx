@@ -331,7 +331,7 @@ const Profile = () => {
               onClick={() => setSelectedTab('ads')}
               style={{ textAlign: 'left' }}
             >
-              Meus Anúncios
+              Anúncios
             </button>
             <button
               className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'reviews' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
@@ -357,7 +357,6 @@ const Profile = () => {
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
                     </div>
-
                     <div className="flex flex-col space-y-2">
                       <p className="text-left text-gray-600">
                       <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
