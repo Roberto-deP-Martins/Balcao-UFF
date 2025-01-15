@@ -325,10 +325,11 @@ const Profile = () => {
 
           <p className="text-lg text-gray-600 mb-6">{userData?.email || 'Email do Usuário'}</p>
 
-          <div className="flex mb-6 gap-4">
+            <div className="flex mb-6 gap-4">
             <button
               className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'ads' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
               onClick={() => setSelectedTab('ads')}
+              style={{ textAlign: 'left' }}
             >
               Meus Anúncios
             </button>
@@ -340,13 +341,13 @@ const Profile = () => {
             </button>
             {currentUserId === Number(idUser) && (
               <button
-                className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'transactions' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
-                onClick={() => setSelectedTab('transactions')}
+              className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'transactions' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
+              onClick={() => setSelectedTab('transactions')}
               >
-                Minhas Transações
+              Minhas Transações
               </button>
             )}
-          </div>
+            </div>
 
           {selectedTab === 'ads' && (
             <div className="w-full mt-6 space-y-4">
@@ -358,9 +359,15 @@ const Profile = () => {
                     </div>
 
                     <div className="flex flex-col space-y-2">
-                      <p className="text-gray-600">{ad.category ? `Categoria: ${ad.category}` : 'Categoria não informada'}</p>
-                      <p className="text-gray-600">{ad.location || 'Localização não informada'}</p>
-                      <p className="text-gray-600">{ad.price ? `Preço: $${ad.price}` : 'Preço não informado'}</p>
+                      <p className="text-left text-gray-600">
+                      <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                      <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                      <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Não informado'}
+                      </p>
                     </div>
                   </div>
                 ))
