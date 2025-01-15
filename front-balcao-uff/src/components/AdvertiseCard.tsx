@@ -63,9 +63,16 @@ const AdvertiseCard = ({ ad }: { ad: Ads }) => {
         
         <Divider sx={{ marginY: 1 }} /> {/* Divisória */}
         
+        <Typography variant="body2" sx={{ textAlign: 'left', fontWeight: 'bold', color: 'secondary' }}>
+          {ad.category}
+        </Typography>
+
+        <Divider sx={{ marginY: 1 }} /> {/* Divisória */}
+        
         <Typography variant="body2" sx={{ textAlign: 'left' }}>
           Contato: {ad.contactInfo}
         </Typography>
+        
         <Typography variant="body2" sx={{ textAlign: 'left' }}>
           Localização: {ad.location}
         </Typography>

@@ -10,6 +10,7 @@ import lombok.Builder;
 @Builder
 public record TransacaoResponseDTO(
         Long anuncioId, 
+        String anuncioName,
         Long anuncianteId, 
         Long interessadoId,
         @JsonProperty
