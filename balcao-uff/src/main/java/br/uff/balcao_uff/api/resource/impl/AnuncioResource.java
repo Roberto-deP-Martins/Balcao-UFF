@@ -79,17 +79,10 @@ public class AnuncioResource implements AnuncioResourceApi {
 
 	@PostMapping("/delete")
 	public ResponseEntity<String> delete(@RequestBody AnuncioDeleteRequestDTO id) {
-
-		try {
-			service.deleteById(id.id());
-			return ResponseEntity.ok("Anúncio deletado com sucesso!");
-		} catch (RuntimeException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro ao deletar anúncio: " + e.getMessage());
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao deletar anúncio.");
-		}
-
+	    service.deleteById(id.id());
+	    return ResponseEntity.ok("Anúncio deletado com sucesso!");
 	}
+
 
 	@PostMapping("/category")
 	public ResponseEntity<List<AnuncioResponseDTO>> findByCategory(

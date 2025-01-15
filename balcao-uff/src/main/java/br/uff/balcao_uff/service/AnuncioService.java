@@ -1,9 +1,27 @@
 package br.uff.balcao_uff.service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import br.uff.balcao_uff.api.dto.request.AnuncioPesquisaAvancadaRequestDTO;
 import br.uff.balcao_uff.api.dto.request.AnuncioRequestDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponseDTO;
 import br.uff.balcao_uff.api.dto.response.AnuncioResponsePerfilDTO;
+import br.uff.balcao_uff.commons.util.enums.UserRole;
+import br.uff.balcao_uff.commons.util.exceptions.AnuncioNotFoundException;
+import br.uff.balcao_uff.commons.util.exceptions.UnauthorizedDeletionException;
 import br.uff.balcao_uff.entity.AnuncioEntity;
 import br.uff.balcao_uff.entity.AnuncioImageEntity;
 import br.uff.balcao_uff.entity.LocationEntity;
@@ -14,20 +32,6 @@ import br.uff.balcao_uff.repository.LocationRepository;
 import br.uff.balcao_uff.repository.UserRepository;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Serviço responsável por gerenciar operações relacionadas aos anúncios,
@@ -166,11 +170,26 @@ public void update(AnuncioRequestDTO anuncioRequestDTO) {
      */
     @Transactional
     public void deleteById(Long id) {
-        AnuncioEntity existingAnuncio = anuncioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-        
-        existingAnuncio.setDtDelete(new Date());
-        anuncioRepository.save(existingAnuncio);
+        AnuncioEntity existingAnuncio = findAnuncioById(id);
+        authorizeUserToDeleteAnuncio(existingAnuncio);
+        markAnuncioAsDeleted(existingAnuncio);
+    }
+
+    private AnuncioEntity findAnuncioById(Long id) {
+        return anuncioRepository.findById(id)
+                .orElseThrow(() -> new AnuncioNotFoundException("Anúncio não encontrado com ID: " + id));
+    }
+
+    private void authorizeUserToDeleteAnuncio(AnuncioEntity anuncio) {
+        UserEntity user = authorizationService.getAuthenticatedUser();
+        if (!user.getId().equals(anuncio.getUser().getId()) && !user.getRole().equals(UserRole.ADMIN)) {
+            throw new UnauthorizedDeletionException("Usuário não tem autorização para excluir este anúncio.");
+        }
+    }
+
+    private void markAnuncioAsDeleted(AnuncioEntity anuncio) {
+        anuncio.setDtDelete(new Date());
+        anuncioRepository.save(anuncio);
     }
 
 
@@ -302,6 +321,6 @@ public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, Li
                 .category(anuncio.getCategory())
                 .location(anuncio.getLocation() != null ? anuncio.getLocation().getAddress() : "Endereço não informado")
                 .price(anuncio.getPrice())
-                .build()).collect(Collectors.toList());
+                .build()).toList();
     }
 }
