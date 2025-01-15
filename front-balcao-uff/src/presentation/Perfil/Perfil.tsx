@@ -366,8 +366,14 @@ const Profile = () => {
                       <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
                       </p>
                       <p className="text-left text-gray-600">
-                      <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Não informado'}
+                      <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
                       </p>
+                        <p className="text-left text-gray-600">
+                        <span className="font-semibold">Status:</span> 
+                        <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
+                        {ad.available ? ' Disponível' : ' Indisponível/Deletado'}
+                        </span>
+                        </p>
                     </div>
                   </div>
                 ))
