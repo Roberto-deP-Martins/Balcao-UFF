@@ -6,19 +6,10 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import Divider from '@mui/material/Divider'; // Importando o componente Divider do Material-UI
+import Divider from '@mui/material/Divider';
+import {Ads} from '../interfaces/interfaces';
 
-interface Ad {
-  imagePaths: string[];
-  title: string;
-  category: string;
-  description: string;
-  price: number;
-  contactInfo: string;
-  location: string;
-}
-
-const AdvertiseCard = ({ ad }: { ad: Ad }) => {
+const AdvertiseCard = ({ ad }: { ad: Ads }) => {
   const navigate = useNavigate();
   const handleVerMais = () => {
     navigate("/advertiseView", { state: { ad } });
