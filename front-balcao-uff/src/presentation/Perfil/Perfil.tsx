@@ -384,7 +384,7 @@ const Profile = () => {
                         </div>
                       </div>
                       <p className="text-gray-600">{review.comment}</p>
-                      <p className="text-sm text-gray-400 mt-2">Avaliado em: {new Date(review.reviewDate).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-400 mt-2">Avaliado em: {new Date(review.reviewDate.split(' ')[0].split('/').reverse().join('-')).toLocaleDateString()}</p>
                     </div>
                   ))}
                 </div>
