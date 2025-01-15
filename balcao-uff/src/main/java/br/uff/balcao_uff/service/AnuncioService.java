@@ -321,6 +321,7 @@ public AnuncioResponseDTO saveWithImages(AnuncioRequestDTO anuncioRequestDTO, Li
                 .category(anuncio.getCategory())
                 .location(anuncio.getLocation() != null ? anuncio.getLocation().getAddress() : "Endereço não informado")
                 .price(anuncio.getPrice())
+                .available(anuncio.getDtDelete() == null)
                 .build()).toList();
     }
 }
