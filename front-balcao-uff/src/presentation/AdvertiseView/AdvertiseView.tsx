@@ -260,21 +260,24 @@ const AdvertiseView = () => {
             </div>
 
             <div className='width-full flex gap-2 justify-center'>
-              <button
+                <button
                 className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
                 onClick={() => { setSelectedConversation(conversa); setIndexSelectedConversation(index) }}
-              >
+                >
                 Visualizar Conversa
-              </button>
-              {
+                </button>
+                {
                 conversa.interessadoFecharNegocio &&
                   <button
-                    className="mt-3 bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition"
-                    onClick={() => { handleAceitarNegocio(conversa?.mensagens[0].senderId) }}  
+                  className="mt-3 bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition"
+                  onClick={async () => { 
+                    await handleAceitarNegocio(conversa?.mensagens[0].senderId);
+                    navigate('/advertises');
+                  }}  
                   >
-                    {!aceitarNegocio ? "Aceitar Negócio" : "Negocio Fechado"}
+                  {!aceitarNegocio ? "Aceitar Negócio" : "Negocio Fechado"}
                   </button> 
-              }
+                }
             </div>
           </div>
         ))}

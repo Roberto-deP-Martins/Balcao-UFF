@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import AdvertiseCard from "../../components/AdvertiseCard";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Swal from "sweetalert2"; // Importando o SweetAlert2
+import Swal from "sweetalert2";
 
 const ListAdvertise = () => {
   const [advertises, setAdvertises] = useState<any[]>([]);
   const [category, setCategory] = useState<string>("");
-  const [isNearby, setIsNearby] = useState<boolean>(false);
   const [showNearby, setShowNearby] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
 
