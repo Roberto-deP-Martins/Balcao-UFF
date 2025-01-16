@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import AdvertiseCard from "../../components/AdvertiseCard";
-import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -15,7 +14,9 @@ const ListAdvertise = () => {
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [user, setUser] = useState<any>(null); // Estado para armazenar o usuário
+  const [showNearby, setShowNearby] = useState<boolean>(false); // Estado para controle de busca por localização
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     fetchAdvertises();
@@ -73,6 +74,74 @@ const ListAdvertise = () => {
     });
     setFilteredAdvertises(filtered);
   };
+
+  const handleSearchByLocation = async () => {
+    if (showNearby) {
+        fetchAdvertises();
+        setShowNearby(false);
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        console.error("Geolocalização não é suportada pelo seu navegador.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            console.log("Latitude:", latitude);
+            console.log("Longitude:", longitude);
+
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    console.error("Token não encontrado.");
+                    return;
+                }
+                const response = await fetch(
+                    `http://localhost:8080/anuncios/nearby?lat=${latitude}&lng=${longitude}&radius=10`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (!response.ok) {
+                    console.error("Erro ao buscar anúncios próximos. Status:", response.status);
+                    const errorResponse = await response.json();
+                    console.error("Detalhes do erro:", errorResponse);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log("Anúncios próximos:", data);
+
+                setAdvertises(data);
+                setFilteredAdvertises(data);
+                setShowNearby(true);
+            } catch (error) {
+                console.error("Erro ao buscar anúncios próximos:", error);
+            }
+        },
+        (error) => {
+            console.error("Erro ao obter localização:", error);
+        },
+        {
+            enableHighAccuracy: true, // Opção de alta precisão
+            timeout: 5000, // Tempo máximo de espera (5 segundos)
+            maximumAge: 0 // Não usar localização armazenada em cache
+        }
+    );
+};
+
+
+
+
+  
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
@@ -146,8 +215,8 @@ const ListAdvertise = () => {
           />
         </div>
 
-        {/* Input for Minimum Price */}
-        <div className="flex flex-col w-1/6">
+                {/* Input for Minimum Price */}
+                <div className="flex flex-col w-1/6">
           <label className="mb-2 font-medium">Preço mínimo</label>
           <input
             type="number"
@@ -173,6 +242,18 @@ const ListAdvertise = () => {
             className="p-2 border border-gray-300 rounded"
           />
         </div>
+
+        {/* Button for Nearby Search */}
+        <button
+          onClick={handleSearchByLocation}
+          className={`flex items-center px-4 py-2 ${
+            showNearby ? "bg-green-600" : "bg-blue-600"
+          } text-white rounded hover:bg-blue-700 shadow-md`}
+        >
+          {showNearby ? "Mostrar Todos" : "Buscar Próximos"}
+        </button>
+
+        
 
         {/* Criar Anúncio Button */}
         <button
