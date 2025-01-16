@@ -249,19 +249,23 @@ const AdvertiseView = () => {
                   className={`flex ${mensagem.senderId === userId ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`${mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
-                      } max-w-xs p-2 rounded-lg shadow-md text-sm`}
-                  >
-                    <p>{mensagem.conteudo}</p>
-                    <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+                      className={`${mensagem.senderId === userId ? 'bg-green-600 text-black' : 'bg-blue-500 text-white'
+                        } max-w-xs p-2 rounded-lg shadow-md text-sm text-left`}
+                    >
+                      <p className="text-black text-left">{mensagem.senderName}</p>
+                      <p className="text-left text-white">{mensagem.conteudo}</p>
+                      <p className="text-xs text-black mt-1 text-left">
+                        {new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}
+                      </p>
                   </div>
+
                 </div>
               ))}
             </div>
 
             <div className='width-full flex gap-2 justify-center'>
                 <button
-                className="mt-3 bg-orange-500 text-white py-1 px-3 rounded-lg hover:bg-orange-600 transition"
+                className="mt-3 bg-blue-900 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition"
                 onClick={() => { setSelectedConversation(conversa); setIndexSelectedConversation(index) }}
                 >
                 Visualizar Conversa
@@ -269,7 +273,7 @@ const AdvertiseView = () => {
                 {
                 conversa.interessadoFecharNegocio &&
                   <button
-                  className="mt-3 bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition"
+                  className="mt-3 bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-700 transition"
                   onClick={async () => { 
                     await handleAceitarNegocio(conversa?.mensagens[0].senderId);
                     navigate('/advertises');
@@ -308,11 +312,14 @@ const AdvertiseView = () => {
               className={`flex ${mensagem.senderId === userId ? placeText1 : placeText2}`}
             >
               <div
-                className={`${mensagem.senderId === userId ? 'bg-gray-300 text-gray-900' : 'bg-orange-500 text-white'
-                  } max-w-xs p-2 rounded-lg shadow-md text-sm`}
-              >
-                <p>{mensagem.conteudo}</p>
-                <p className="text-xs text-gray-500 mt-1">{new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}</p>
+                  className={`${mensagem.senderId === userId ? 'bg-green-600 text-black' : 'bg-blue-500 text-white'
+                    } max-w-xs p-2 rounded-lg shadow-md text-sm text-left`}
+                >
+                  <p className="text-black text-left">{mensagem.senderName}</p>
+                  <p className="text-left text-white">{mensagem.conteudo}</p>
+                  <p className="text-xs text-black mt-1 text-left">
+                    {new Date(mensagem.dataEnvio).toLocaleString('pt-BR')}
+                  </p>
               </div>
             </div>
           ))}
@@ -321,7 +328,7 @@ const AdvertiseView = () => {
           <input
             type="text"
             placeholder="Digite sua mensagem"
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={(e) => {
@@ -329,19 +336,19 @@ const AdvertiseView = () => {
             }}
           />
           <button
-            className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+            className="bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
             onClick={handleCommentSubmit}
           >
             Enviar
           </button>
           {isNormalUser && !selectedConversation?.interessadoFecharNegocio && !setFecharNegocio ?
             <button
-              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+              className="bg-blue-900 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
               onClick={handleFecharNegocio}
             >
               Fechar Negocio
             </button> : (
-              <div className="bg-blue-500 text-white py-2 px-4 rounded-lg ">
+              <div className="bg-blue-900 text-white py-2 px-4 rounded-lg ">
                 Esperando Resposta!
               </div>
             )
@@ -363,7 +370,7 @@ const AdvertiseView = () => {
             <input
               type="text"
               placeholder="Digite seu comentário"
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onKeyDown={(e) => {
@@ -374,7 +381,7 @@ const AdvertiseView = () => {
               autoFocus
             />
             <button
-              className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
               onClick={handleCommentSubmitInit}
             >
               Enviar
@@ -384,7 +391,7 @@ const AdvertiseView = () => {
       }
       return (
         <button
-          className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
           onClick={() => setIsWriting(true)}
         >
           Iniciar Conversa
@@ -411,10 +418,10 @@ const AdvertiseView = () => {
   )
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-
+    <div className="max-w-7xl mx-auto px-6 py-10 border border-blue-500 rounded-lg">
+  
       <button
-        className="mb-4 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center gap-2"
+        className="mb-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition flex items-center gap-2"
         onClick={handleGoBack}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -422,10 +429,9 @@ const AdvertiseView = () => {
         </svg>
         Voltar
       </button>
-
-
+  
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
+  
         <div className="rounded-lg shadow-lg overflow-hidden">
           {ad.imagePaths && ad.imagePaths.length > 0 ? (
             <Carousel showThumbs={false} infiniteLoop showStatus={false} className="rounded-lg">
@@ -448,10 +454,10 @@ const AdvertiseView = () => {
             </div>
           )}
         </div>
-
-        <div>
+  
+        <div className="text-left">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{ad.title}</h1>
-          <p className="text-2xl text-green-600 font-bold mb-4">
+          <p className="text-2xl text-blue-600 font-bold mb-4">
             R$ {ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-gray-700 text-base mb-4">
@@ -460,7 +466,7 @@ const AdvertiseView = () => {
           <p className="text-gray-700 text-base mb-6">
             <span className="font-semibold">Descrição:</span> {ad.description}
           </p>
-
+  
           <div className="border-t pt-4 mt-4">
             <p className="text-gray-700 text-base mb-2">
               <span className="font-semibold">Contato:</span> {ad.contactInfo}
@@ -469,24 +475,16 @@ const AdvertiseView = () => {
               <span className="font-semibold">Localização:</span> {ad.location}
             </p>
           </div>
-
-          <div className="mt-8">
-            <button
-              className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
-              onClick={() => alert("Entrando em contato!")}
-            >
-              Contatar Vendedor
-            </button>
-          </div>
         </div>
       </div>
-
+  
       {/* Renderizar barra de comentarios */}
       <div className="mt-10 border-t pt-4">
         {isNormalUser ? renderCommentSection() : b}
       </div>
     </div>
   );
+  
 };
 
 export default AdvertiseView;

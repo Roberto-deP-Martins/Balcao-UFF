@@ -3,12 +3,14 @@ import AdvertiseCard from "../../components/AdvertiseCard";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
+import { Advertise } from "../../interfaces/interfaces";
 
 const ListAdvertise = () => {
-  const [advertises, setAdvertises] = useState<any[]>([]);
+  const [advertises, setAdvertises] = useState<Advertise[]>([]);
   const [category, setCategory] = useState<string>("");
   const [showNearby, setShowNearby] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
+  const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
     fetchAdvertises();
@@ -61,7 +63,6 @@ const ListAdvertise = () => {
   };
 
   const handleDelete = async (id: number) => {
-    
     const result = await Swal.fire({
       title: "Tem certeza?",
       text: "Esta ação não pode ser desfeita!",
@@ -88,7 +89,6 @@ const ListAdvertise = () => {
           throw new Error("Erro ao deletar anúncio");
         }
 
-        
         setAdvertises(advertises.filter(ad => ad.id !== id));
         Swal.fire("Deletado!", "O anúncio foi excluído com sucesso.", "success");
       } catch (error) {
@@ -98,33 +98,18 @@ const ListAdvertise = () => {
     }
   };
 
-  const handleSearchByCategory = async () => {
-    if (!category.trim()) {
-      fetchAdvertises();
+  const handleSearch = () => {
+    if (!searchText.trim()) {
+      fetchAdvertises(); // Se não houver texto de busca, mostra todos os anúncios
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch("http://localhost:8080/anuncios/category", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ category }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro na requisição");
-      }
-
-      const data = await response.json();
-      setAdvertises(data);
-    } catch (error) {
-      console.error("Erro ao buscar anúncios por categoria:", error);
-    }
+    const filteredAds = advertises.filter(ad =>
+      ad.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      ad.description.toLowerCase().includes(searchText.toLowerCase()) ||
+      ad.category.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setAdvertises(filteredAds);
   };
 
   const handleSearchByLocation = async () => {
@@ -173,24 +158,26 @@ const ListAdvertise = () => {
       <div className="text-xl font-semibold mb-4">Anúncios</div>
 
       <div className="mb-4 flex items-center justify-between">
+        {/* Input de busca por texto */}
         <input
           type="text"
-          placeholder="Digite a categoria"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Pesquisar por título, descrição, categoria ou local"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSearchByCategory();
+              handleSearch(); // Aciona a busca ao pressionar Enter
             }
           }}
           className="p-2 border border-gray-300 rounded mb-2 w-2/3"
         />
         <button
-          onClick={handleSearchByCategory}
+          onClick={handleSearch}
           className="w-10 h-10 flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 ml-2"
         >
           <FaSearch />
         </button>
+
         <Link to="/create-advertise" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md ml-2">
           Criar Novo Anúncio
         </Link>

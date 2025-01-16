@@ -464,9 +464,9 @@ const Profile = () => {
                 <select
                   value={rating ?? ''}
                   onChange={(e) => setRating(Number(e.target.value))} // Atualiza a nota
-                  className="p-2 border rounded-md"
+                  className="p-2 border rounded-md bg-white"
                 >
-                    <option value="" disabled>Escolha uma nota</option>
+                    <option className='bg-white' value="" disabled>Escolha uma nota</option>
                     {[1, 2, 3, 4, 5].map((i) => (
                     <option key={i} value={i} style={{ backgroundColor: 'white' }}>{i}</option>
                     ))}

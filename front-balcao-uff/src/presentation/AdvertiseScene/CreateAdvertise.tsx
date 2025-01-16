@@ -1,5 +1,4 @@
 import { useState } from "react";
-import TextField from '@mui/material/TextField';
 import Maps from "../../components/Maps";
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -7,8 +6,6 @@ import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Stack from '@mui/material/Stack';
-
-
 
 const CreateAdvertise = () => {
     const [title, setTitle] = useState<string>("");
@@ -113,7 +110,10 @@ const CreateAdvertise = () => {
     };
 
     return (
-        <div className="w-screen h-full p-6 bg-gray-50">
+        <div
+            className="w-screen h-full p-6 bg-gray-50"
+            style={{ paddingTop: '64px' }} // Reservar espaço para a navbar
+        >
             <div className="text-2xl font-semibold mb-6">
                 Criar novo Anúncio
             </div>
@@ -121,46 +121,39 @@ const CreateAdvertise = () => {
                 {error && <div className="text-red-500">{error}</div>}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <TextField
-                        id="title"
-                        label="Título"
-                        variant="outlined"
-                        fullWidth
+                    <input
+                        type="text"
+                        placeholder="Título"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
-                    <TextField
-                        id="description"
-                        label="Descrição"
-                        variant="outlined"
-                        fullWidth
+                    <input
+                        placeholder="Descrição"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
-                    <TextField
-                        id="category"
-                        label="Categoria"
-                        variant="outlined"
-                        fullWidth
+                    <input
+                        type="text"
+                        placeholder="Categoria"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
-                    <TextField
-                        id="price"
-                        label="Preço"
-                        variant="outlined"
+                    <input
                         type="number"
-                        fullWidth
+                        placeholder="Preço"
                         value={price}
                         onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : "")}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
-                    <TextField
-                        id="contactInfo"
-                        label="Informações de contato"
-                        variant="outlined"
-                        fullWidth
+                    <input
+                        type="text"
+                        placeholder="Informações de contato"
                         value={contactInfo}
                         onChange={(e) => setContactInfo(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
                 </div>
 
@@ -219,8 +212,6 @@ const CreateAdvertise = () => {
                         Cancelar
                     </Button>
                 </Stack>
-
-
             </form>
         </div>
     );
