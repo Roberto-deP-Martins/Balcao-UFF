@@ -258,21 +258,15 @@ const Profile = () => {
     }
   }, [idUser, navigate]);
 
-
   const renderStars = (reputation: number) => {
-    const totalStars = 5;
-    const filledStars = Math.round(reputation);
-    const emptyStars = totalStars - filledStars;
-
-    const stars = [];
-    for (let i = 0; i < filledStars; i++) {
-      stars.push("★");
-    }
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push("☆");
-    }
-
-    return stars.join(" ");
+    return (
+      <Rating
+        name="half-rating-read"
+        value={reputation}
+        precision={0.5}
+        readOnly
+      />
+    );
   };
 
   const handleOpenDialog = (transaction: Transaction) => {
@@ -473,8 +467,8 @@ const Profile = () => {
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xl font-semibold text-gray-800">{review.reviewerName}</h3>
                         <div className="flex items-center">
-                          <span className="text-yellow-400 mr-2">{"★".repeat(review.rating)}</span>
-                          <span className="text-sm text-gray-500">({review.rating})</span>
+                          <Rating name="half-rating-read" value={review.rating} precision={0.5} readOnly />
+                          <span className="text-sm text-gray-500 ml-2">({review.rating})</span>
                         </div>
                       </div>
                       <p className="text-gray-600">{review.comment}</p>
@@ -545,15 +539,15 @@ const Profile = () => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
-              <div className="mt-4">
+                <div className="mt-4">
                 <Typography component="legend">Nota</Typography>
                 <Rating
-                  name="customized-10"
+                  name="half-rating"
                   value={rating ?? 0}
-                  max={5}
+                  precision={1}
                   onChange={(event, newValue) => setRating(newValue)}
                 />
-              </div>
+                </div>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDialog}>Cancelar</Button>
