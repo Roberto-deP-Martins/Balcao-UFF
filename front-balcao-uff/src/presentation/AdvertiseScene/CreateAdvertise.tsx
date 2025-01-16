@@ -1,11 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Maps from "../../components/Maps";
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
-import CancelIcon from '@mui/icons-material/Cancel';
-import Stack from '@mui/material/Stack';
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
+import SendIcon from "@mui/icons-material/Send";
+import CancelIcon from "@mui/icons-material/Cancel";
+import Stack from "@mui/material/Stack";
 
 const CreateAdvertise = () => {
     const [title, setTitle] = useState<string>("");
@@ -17,11 +17,29 @@ const CreateAdvertise = () => {
     const [image1, setImage1] = useState<File | null>(null);
     const [image2, setImage2] = useState<File | null>(null);
     const [image3, setImage3] = useState<File | null>(null);
+    const [preview1, setPreview1] = useState<string | null>(null);
+    const [preview2, setPreview2] = useState<string | null>(null);
+    const [preview3, setPreview3] = useState<string | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [error, setError] = useState<string>("");
 
     const navigate = useNavigate();
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, setImage: Function, setPreview: Function) => {
+        const file = e.target.files?.[0] || null;
+        setImage(file);
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPreview(null);
+        }
+    };
 
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,21 +47,21 @@ const CreateAdvertise = () => {
 
         if (!image1 || !image2 || !image3) {
             Swal.fire({
-                title: 'Erro',
+                title: "Erro",
                 text: "Por favor, envie exatamente 3 imagens.",
-                icon: 'error',
-                confirmButtonText: 'Ok',
+                icon: "error",
+                confirmButtonText: "Ok",
             });
             return;
         }
 
         const result = await Swal.fire({
-            title: 'Você tem certeza?',
+            title: "Você tem certeza?",
             text: "Deseja realmente salvar este anúncio?",
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Sim, salvar!',
-            cancelButtonText: 'Não, cancelar',
+            confirmButtonText: "Sim, salvar!",
+            cancelButtonText: "Não, cancelar",
         });
 
         if (result.isConfirmed) {
@@ -93,15 +111,13 @@ const CreateAdvertise = () => {
                 setImage1(null);
                 setImage2(null);
                 setImage3(null);
+                setPreview1(null);
+                setPreview2(null);
+                setPreview3(null);
 
-                Swal.fire(
-                    'Sucesso!',
-                    'Seu anúncio foi salvo com sucesso!',
-                    'success'
-                );
+                Swal.fire("Sucesso!", "Seu anúncio foi salvo com sucesso!", "success");
 
                 navigate("/advertises");
-
             } catch (error) {
                 setError("Erro ao salvar anúncio.");
                 console.error("Erro ao salvar anúncio:", error);
@@ -110,13 +126,8 @@ const CreateAdvertise = () => {
     };
 
     return (
-        <div
-            className="w-screen h-full p-6 bg-gray-50"
-            style={{ paddingTop: '64px' }} // Reservar espaço para a navbar
-        >
-            <div className="text-2xl font-semibold mb-6">
-                Criar novo Anúncio
-            </div>
+        <div className="w-screen h-full p-6 bg-gray-50" style={{ paddingTop: "64px" }}>
+            <div className="text-2xl font-semibold mb-6">Criar novo Anúncio</div>
             <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded shadow-md">
                 {error && <div className="text-red-500">{error}</div>}
 
@@ -157,34 +168,39 @@ const CreateAdvertise = () => {
                     />
                 </div>
 
-                <div className="text-xl font-semibold mb-4 text-left">
-                    Selecionar Imagens
+                <div className="text-xl font-semibold mb-4 text-left">Selecionar Imagens</div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                    <div className="text-left">
+                        {preview1 && <img src={preview1} alt="Pré-visualização 1" className="w-auto h-32 object-contain mb-2" />}
+                        <input
+                            type="file"
+                            onChange={(e) => handleImageChange(e, setImage1, setPreview1)}
+                            className="p-2 border border-gray-300 rounded w-full sm:w-auto"
+                            accept="image/*"
+                        />
+                    </div>
+                    <div className="text-left">
+                        {preview2 && <img src={preview2} alt="Pré-visualização 2" className="w-auto h-32 object-contain mb-2" />}
+                        <input
+                            type="file"
+                            onChange={(e) => handleImageChange(e, setImage2, setPreview2)}
+                            className="p-2 border border-gray-300 rounded w-full sm:w-auto"
+                            accept="image/*"
+                        />
+                    </div>
+                    <div className="text-left">
+                        {preview3 && <img src={preview3} alt="Pré-visualização 3" className="w-auto h-32 object-contain mb-2" />}
+                        <input
+                            type="file"
+                            onChange={(e) => handleImageChange(e, setImage3, setPreview3)}
+                            className="p-2 border border-gray-300 rounded w-full sm:w-auto"
+                            accept="image/*"
+                        />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <input
-                        type="file"
-                        onChange={(e) => setImage1(e.target.files ? e.target.files[0] : null)}
-                        className="p-2 border border-gray-300 rounded"
-                        accept="image/*"
-                    />
-                    <input
-                        type="file"
-                        onChange={(e) => setImage2(e.target.files ? e.target.files[0] : null)}
-                        className="p-2 border border-gray-300 rounded"
-                        accept="image/*"
-                    />
-                    <input
-                        type="file"
-                        onChange={(e) => setImage3(e.target.files ? e.target.files[0] : null)}
-                        className="p-2 border border-gray-300 rounded"
-                        accept="image/*"
-                    />
-                </div>
-
-                <div className="text-xl font-semibold mb-4 text-left">
-                    Endereço
-                </div>
+                <div className="text-xl font-semibold mb-4 text-left">Endereço</div>
 
                 <Maps
                     onLocationSelect={(lat, lng, address) => {
@@ -195,19 +211,14 @@ const CreateAdvertise = () => {
                 />
 
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        endIcon={<SendIcon />}
-                        color="primary"
-                    >
+                    <Button type="submit" variant="contained" endIcon={<SendIcon />} color="primary">
                         Salvar
                     </Button>
                     <Button
                         variant="outlined"
                         startIcon={<CancelIcon />}
                         color="error"
-                        onClick={() => navigate('/advertises')}
+                        onClick={() => navigate("/advertises")}
                     >
                         Cancelar
                     </Button>
