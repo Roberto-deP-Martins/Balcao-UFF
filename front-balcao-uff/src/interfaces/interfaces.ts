@@ -8,3 +8,4 @@ export * from './User/Reputation';
 export * from './User/Ad';
 export * from './User/Transaction';
 export * from './User/CreateReview';
+export * from './Anuncios/Ads';

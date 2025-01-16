@@ -9,5 +9,6 @@ public class AnuncioResponsePerfilDTO {
     private String title;
     private String category;
     private String location;
+    private boolean available;
     private double price;
 }

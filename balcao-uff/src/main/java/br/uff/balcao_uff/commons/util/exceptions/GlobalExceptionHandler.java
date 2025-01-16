@@ -96,4 +96,28 @@ public class GlobalExceptionHandler {
                                                       ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
+    
+    @ExceptionHandler(UnauthorizedDeletionException.class)
+    public ResponseEntity<Object> handleUnauthorizedDeletionException(UnauthorizedDeletionException ex){
+    	Map<String, Object> body = createResponseBody(HttpStatus.UNAUTHORIZED, 
+    												"Autorização de deleção negada", 
+    												ex.getMessage());
+    	return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(AnuncioNotFoundException.class)
+    public ResponseEntity<Object> handleAnuncioNotFoundException(AnuncioNotFoundException ex){
+    	Map<String, Object> body = createResponseBody(HttpStatus.NOT_FOUND, 
+    												"Anúncio não escontrado", 
+    												ex.getMessage());
+    	return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<Object> handleDuplicateReviewException(DuplicateReviewException ex){
+    	Map<String, Object> body = createResponseBody(HttpStatus.CONFLICT, 
+    												"Usuário já avaliado", 
+    												ex.getMessage());
+    	return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
 }

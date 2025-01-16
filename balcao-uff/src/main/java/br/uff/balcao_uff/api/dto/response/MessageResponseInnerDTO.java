@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class MessageResponseInnerDTO {
     private Long id;
     private Long senderId;
+    private String senderName;
     private String conteudo;
     private LocalDateTime dataEnvio;
     private boolean isRead;

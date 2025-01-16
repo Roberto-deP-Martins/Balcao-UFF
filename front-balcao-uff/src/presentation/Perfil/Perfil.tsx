@@ -11,6 +11,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { getUserProfile, getUserReviews, fetchAds, getUserReputation, getCurrentUser, fetchTransactions } from '../../service/userservice';
 import { API_CONFIG } from '../../service/config';
+import { Checkbox, FormControlLabel, Rating, Typography } from '@mui/material';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -26,6 +28,12 @@ const Profile = () => {
   const [comment, setComment] = useState('');
   const navigate = useNavigate();
   const { idUser } = useParams();
+  // const [filterAvailable, setFilterAvailable] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<{ available: boolean; unavailable: boolean }>({
+    available: false,
+    unavailable: false,
+  });
+  const [filteredAds, setFilteredAds] = useState<Ad[]>([]);
 
   const getToken = () => {
     const token = localStorage.getItem("token");
@@ -35,6 +43,47 @@ const Profile = () => {
     }
     return token;
   };
+
+  // Efeito para pegar os anúncios
+  useEffect(() => {
+    if (!idUser) {
+      navigate('/login');
+    } else {
+      fetchAds(idUser).then((data) => {
+        if (data) {
+          setAds(data);
+          setFilteredAds(data); // Inicialmente, mostramos todos os anúncios
+        }
+      });
+    }
+  }, [idUser, navigate]);
+
+  useEffect(() => {
+    // Filtra os anúncios com base nos filtros de status
+    const filtered = ads.filter((ad) => {
+      // Se ambos os filtros estiverem desmarcados, mostramos todos os anúncios
+      if (!statusFilter.available && !statusFilter.unavailable) {
+        return true;
+      }
+      if (statusFilter.available && ad.available) {
+        return true;
+      }
+      if (statusFilter.unavailable && !ad.available) {
+        return true;
+      }
+      return false;
+    });
+    setFilteredAds(filtered);
+  }, [statusFilter, ads]);
+
+  // Função para lidar com as mudanças de filtro de status
+  const handleStatusFilterChange = (event: React.ChangeEvent<HTMLInputElement>, status: string) => {
+    setStatusFilter((prevState) => ({
+      ...prevState,
+      [status]: event.target.checked,
+    }));
+  };
+  //fim de filtro de status
 
 
   useEffect(() => {
@@ -239,26 +288,29 @@ const Profile = () => {
 
   const handleSubmitReview = async () => {
     if (!rating || !comment || !selectedTransaction) {
-      alert("Por favor, forneça uma nota e comentário.");
+      Swal.fire("Atenção", "Por favor, forneça uma nota e comentário.", "warning");
       return;
     }
-  
+
     const token = getToken();
-    if (!token || !selectedTransaction) return;
-  
-    // Definindo reviewerId e reviewedId com base na transação
-    const reviewerId = currentUserId; // Usuário logado
-    const reviewedId = selectedTransaction.anuncianteId === currentUserId 
-                       ? selectedTransaction.interessadoId 
-                       : selectedTransaction.anuncianteId;
-  
+    if (!token) {
+      Swal.fire("Erro", "Usuário não autenticado.", "error");
+      return;
+    }
+
+    const reviewerId = currentUserId;
+    const reviewedId =
+      selectedTransaction.anuncianteId === currentUserId
+        ? selectedTransaction.interessadoId
+        : selectedTransaction.anuncianteId;
+
     const reviewData = {
-      reviewerId,  
-      reviewedId,  
-      rating,      
-      comment,     
+      reviewerId,
+      reviewedId,
+      rating,
+      comment,
     };
-  
+
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/reviews`, {
         method: "POST",
@@ -268,20 +320,21 @@ const Profile = () => {
         },
         body: JSON.stringify(reviewData),
       });
-  
+
       if (response.ok) {
-        alert("Avaliação enviada com sucesso!");
-        handleCloseDialog();  // Fechar o Dialog
-        fetchTransactions(idUser!);  // Atualizar transações
+        Swal.fire("Sucesso!", "Avaliação enviada com sucesso!", "success");
+        fetchTransactions(idUser!); // Atualizar transações
+        handleCloseDialog(); // Fechar o diálogo
       } else {
-        alert("Erro ao enviar avaliação");
+        Swal.fire("Erro", "Usuário já avaliado!", "error");
       }
     } catch (error) {
       console.error("Erro ao enviar avaliação:", error);
+      Swal.fire("Erro", "Ocorreu um erro ao enviar a avaliação.", "error");
     }
   };
-  
-  
+
+
 
   useEffect(() => {
     if (!idUser) {
@@ -329,8 +382,9 @@ const Profile = () => {
             <button
               className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'ads' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
               onClick={() => setSelectedTab('ads')}
+              style={{ textAlign: 'left' }}
             >
-              Meus Anúncios
+              Anúncios
             </button>
             <button
               className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'reviews' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
@@ -349,26 +403,66 @@ const Profile = () => {
           </div>
 
           {selectedTab === 'ads' && (
+          <div className="w-full mt-6">
+            {/* Filtro de status */}
+            <div className="flex mb-4 gap-4">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusFilter.available}
+                    onChange={(e) => handleStatusFilterChange(e, 'available')}
+                    name="statusAvailable"
+                    color="primary"
+                  />
+                }
+                label="Disponível"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusFilter.unavailable}
+                    onChange={(e) => handleStatusFilterChange(e, 'unavailable')}
+                    name="statusUnavailable"
+                    color="primary"
+                  />
+                }
+                label="Indisponível/Deletado"
+              />
+            </div>
+
+            {/* Exibição dos anúncios filtrados */}
             <div className="w-full mt-6 space-y-4">
-              {ads.length > 0 ? (
-                ads.map((ad, index) => (
+              {filteredAds.length > 0 ? (
+                filteredAds.map((ad, index) => (
                   <div key={index} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
                     </div>
-
                     <div className="flex flex-col space-y-2">
-                      <p className="text-gray-600">{ad.category ? `Categoria: ${ad.category}` : 'Categoria não informada'}</p>
-                      <p className="text-gray-600">{ad.location || 'Localização não informada'}</p>
-                      <p className="text-gray-600">{ad.price ? `Preço: $${ad.price}` : 'Preço não informado'}</p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Status:</span>
+                        <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
+                          {ad.available ? 'Disponível' : 'Indisponível/Deletado'}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500">Nenhum anúncio.</p>
+                <p className="text-center text-gray-500">Nenhum anúncio encontrado.</p>
               )}
             </div>
-          )}
+          </div>
+        )}
 
           {selectedTab === 'reviews' && (
             <div className="w-full mt-6">
@@ -384,7 +478,7 @@ const Profile = () => {
                         </div>
                       </div>
                       <p className="text-gray-600">{review.comment}</p>
-                      <p className="text-sm text-gray-400 mt-2">Avaliado em: {new Date(review.reviewDate).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-400 mt-2">Avaliado em: {new Date(review.reviewDate.split(' ')[0].split('/').reverse().join('-')).toLocaleDateString()}</p>
                     </div>
                   ))}
                 </div>
@@ -400,26 +494,31 @@ const Profile = () => {
                 <div className="w-full space-y-4">
                   {transactions.map((transaction) => (
                     <div key={transaction.anuncioId} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                      <p className="text-gray-600">Anúncio ID: {transaction.anuncioId}</p>
-                      <p className="text-gray-600">Data de Conclusão: {new Date(transaction.dtConclusao).toLocaleDateString()}</p>
-                      <p className="text-gray-600">
-                        {transaction.anuncianteReview ? 'Anunciante avaliou.' : 'Anunciante ainda não avaliou.'}
-                      </p>
-                      <p className="text-gray-600">
-                        {transaction.interessadoReview ? 'Interessado avaliou.' : 'Interessado ainda não avaliou.'}
-                      </p>
-
-                      {/* Alteração para exibir o botão para todas as transações */}
-                      {currentUserId === Number(idUser) && (
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xl font-semibold text-gray-800 text-left">Anúncio: {transaction.anuncioName}</h3>
                         <Button
-                        variant="outlined"
-                        onClick={() => handleOpenDialog(transaction)}
-                        className="mt-4"
-                      >
-                        Avaliar
-                      </Button>
-                      
-                      )}
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleOpenDialog(transaction)}
+                        >
+                          Avaliar usuário
+                        </Button>
+                      </div>
+                      <p className="text-gray-600 text-left"><span className="font-semibold">Anúncio ID:</span> {transaction.anuncioId}</p>
+                      <p className="text-gray-600 text-left"><span className="font-semibold">Data de Conclusão:</span> {new Date(transaction.dtConclusao.split(' ')[0].split('/').reverse().join('-')).toLocaleDateString()}</p>
+                      <p className="text-gray-600 text-left">
+                        <span className="font-semibold">Anunciante:</span>
+                        <span className={transaction.anuncianteReview ? 'text-green-500' : 'text-red-500'}>
+                          {transaction.anuncianteReview ? ' Avaliou' : ' Ainda não avaliou'}
+                        </span>
+                      </p>
+                      <p className="text-gray-600 text-left">
+                        <span className="font-semibold">Negociante:</span>
+                        <span className={transaction.interessadoReview ? 'text-green-500' : 'text-red-500'}>
+                          {transaction.interessadoReview ? ' Avaliou' : '   Ainda não avaliou'}
+                        </span>
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -430,10 +529,10 @@ const Profile = () => {
           )}
 
 
-          <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
             <DialogTitle>Avaliação</DialogTitle>
             <DialogContent>
-              <DialogContentText>Deixe sua avaliação para esta transação.</DialogContentText>
+              <DialogContentText>Deixe sua avaliação para esse usuário.</DialogContentText>
               <TextField
                 autoFocus
                 required
@@ -444,27 +543,46 @@ const Profile = () => {
                 fullWidth
                 variant="standard"
                 value={comment}
-                onChange={(e) => setComment(e.target.value)} // Atualiza o comentário
+                onChange={(e) => setComment(e.target.value)}
               />
               <div className="mt-4">
-                <span>Nota: </span>
-                <select
-                  value={rating ?? ''}
-                  onChange={(e) => setRating(Number(e.target.value))} // Atualiza a nota
-                  className="p-2 border rounded-md"
-                >
-                  <option value="" disabled>Escolha uma nota</option>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
+                <Typography component="legend">Nota</Typography>
+                <Rating
+                  name="customized-10"
+                  value={rating ?? 0}
+                  max={5}
+                  onChange={(event, newValue) => setRating(newValue)}
+                />
               </div>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDialog}>Cancelar</Button>
-              <Button onClick={handleSubmitReview}>Avaliar</Button> {/* Envia a avaliação */}
+              <Button
+                onClick={async () => {
+                  handleCloseDialog();
+                  setTimeout(async () => {
+                    const result = await Swal.fire({
+                      title: "Enviar Avaliação?",
+                      text: "Você não poderá editar sua avaliação depois de enviada.",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonText: "Sim, enviar!",
+                      cancelButtonText: "Cancelar",
+                    });
+
+                    if (result.isConfirmed) {
+                      await handleSubmitReview();
+                    }
+                  }, 300);
+                }}
+                variant="contained"
+                color="primary"
+              >
+                Avaliar
+              </Button>
             </DialogActions>
           </Dialog>
+
         </div>
       </main>
     </div>

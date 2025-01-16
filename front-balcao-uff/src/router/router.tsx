@@ -27,6 +27,10 @@ export const router = createBrowserRouter([
       {
         path: "users",
         element: <UserList/>,
+      },
+      {
+        path: "/advertiseView",
+        element: <AdvertiseView />,
       }
     ],
   },
@@ -34,10 +38,7 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-  {
-    path: "/advertiseView",
-    element: <AdvertiseView />,
-  },
+  
   {
     path: "/perfil/:idUser",
     element: <Perfil />,

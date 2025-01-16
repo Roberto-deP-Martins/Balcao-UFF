@@ -85,3 +85,26 @@ export const createAdvertise = async (advertiseData: Advertise, images: File[]):
         throw error;
     }
 };
+
+export const deleteAdvertise = async (id: number): Promise<void> => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/anuncios/delete`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Erro ao deletar anúncio");
+        }
+    } catch (error) {
+        console.error("Erro ao deletar anúncio:", error);
+        throw error;
+    }
+};
+
