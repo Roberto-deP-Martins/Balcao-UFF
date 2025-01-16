@@ -12,6 +12,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { getUserProfile, getUserReviews, fetchAds, getUserReputation, getCurrentUser, fetchTransactions } from '../../service/userservice';
 import { API_CONFIG } from '../../service/config';
 import { Rating, Typography } from '@mui/material';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -240,18 +241,21 @@ const Profile = () => {
 
   const handleSubmitReview = async () => {
     if (!rating || !comment || !selectedTransaction) {
-      alert("Por favor, forneça uma nota e comentário.");
+      Swal.fire("Atenção", "Por favor, forneça uma nota e comentário.", "warning");
       return;
     }
 
     const token = getToken();
-    if (!token || !selectedTransaction) return;
+    if (!token) {
+      Swal.fire("Erro", "Usuário não autenticado.", "error");
+      return;
+    }
 
-    // Definindo reviewerId e reviewedId com base na transação
-    const reviewerId = currentUserId; // Usuário logado
-    const reviewedId = selectedTransaction.anuncianteId === currentUserId
-      ? selectedTransaction.interessadoId
-      : selectedTransaction.anuncianteId;
+    const reviewerId = currentUserId;
+    const reviewedId =
+      selectedTransaction.anuncianteId === currentUserId
+        ? selectedTransaction.interessadoId
+        : selectedTransaction.anuncianteId;
 
     const reviewData = {
       reviewerId,
@@ -271,14 +275,15 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        alert("Avaliação enviada com sucesso!");
-        handleCloseDialog();  // Fechar o Dialog
-        fetchTransactions(idUser!);  // Atualizar transações
+        Swal.fire("Sucesso!", "Avaliação enviada com sucesso!", "success");
+        fetchTransactions(idUser!); // Atualizar transações
+        handleCloseDialog(); // Fechar o diálogo
       } else {
-        alert("Erro ao enviar avaliação");
+        Swal.fire("Erro", "Usuário já avaliado!", "error");
       }
     } catch (error) {
       console.error("Erro ao enviar avaliação:", error);
+      Swal.fire("Erro", "Ocorreu um erro ao enviar a avaliação.", "error");
     }
   };
 
@@ -414,29 +419,29 @@ const Profile = () => {
                   {transactions.map((transaction) => (
                     <div key={transaction.anuncioId} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
                       <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-xl font-semibold text-gray-800 text-left">Anúncio: {transaction.anuncioName}</h3>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => handleOpenDialog(transaction)}
-                      >
-                        Avaliar usuário
-                      </Button>
+                        <h3 className="text-xl font-semibold text-gray-800 text-left">Anúncio: {transaction.anuncioName}</h3>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleOpenDialog(transaction)}
+                        >
+                          Avaliar usuário
+                        </Button>
                       </div>
                       <p className="text-gray-600 text-left"><span className="font-semibold">Anúncio ID:</span> {transaction.anuncioId}</p>
                       <p className="text-gray-600 text-left"><span className="font-semibold">Data de Conclusão:</span> {new Date(transaction.dtConclusao.split(' ')[0].split('/').reverse().join('-')).toLocaleDateString()}</p>
                       <p className="text-gray-600 text-left">
-                      <span className="font-semibold">Anunciante:</span> 
-                      <span className={transaction.anuncianteReview ? 'text-green-500' : 'text-red-500'}>
-                        {transaction.anuncianteReview ? ' Avaliou' : ' Ainda não avaliou'}
-                      </span>
+                        <span className="font-semibold">Anunciante:</span>
+                        <span className={transaction.anuncianteReview ? 'text-green-500' : 'text-red-500'}>
+                          {transaction.anuncianteReview ? ' Avaliou' : ' Ainda não avaliou'}
+                        </span>
                       </p>
                       <p className="text-gray-600 text-left">
-                      <span className="font-semibold">Negociante:</span> 
-                      <span className={transaction.interessadoReview ? 'text-green-500' : 'text-red-500'}>
-                        {transaction.interessadoReview ? ' Avaliou' : '   Ainda não avaliou'}
-                      </span>
+                        <span className="font-semibold">Negociante:</span>
+                        <span className={transaction.interessadoReview ? 'text-green-500' : 'text-red-500'}>
+                          {transaction.interessadoReview ? ' Avaliou' : '   Ainda não avaliou'}
+                        </span>
                       </p>
                     </div>
                   ))}
@@ -448,7 +453,7 @@ const Profile = () => {
           )}
 
 
-          <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
             <DialogTitle>Avaliação</DialogTitle>
             <DialogContent>
               <DialogContentText>Deixe sua avaliação para esse usuário.</DialogContentText>
@@ -462,7 +467,7 @@ const Profile = () => {
                 fullWidth
                 variant="standard"
                 value={comment}
-                onChange={(e) => setComment(e.target.value)} // Atualiza o comentário
+                onChange={(e) => setComment(e.target.value)}
               />
               <div className="mt-4">
                 <Typography component="legend">Nota</Typography>
@@ -470,17 +475,39 @@ const Profile = () => {
                   name="customized-10"
                   value={rating ?? 0}
                   max={5}
-                  onChange={(event, newValue) => {
-                    setRating(newValue);
-                  }}
+                  onChange={(event, newValue) => setRating(newValue)}
                 />
               </div>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDialog}>Cancelar</Button>
-              <Button onClick={handleSubmitReview}>Avaliar</Button> {/* Envia a avaliação */}
+              <Button
+                onClick={async () => {
+                  handleCloseDialog();
+                  setTimeout(async () => {
+                    const result = await Swal.fire({
+                      title: "Enviar Avaliação?",
+                      text: "Você não poderá editar sua avaliação depois de enviada.",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonText: "Sim, enviar!",
+                      cancelButtonText: "Cancelar",
+                    });
+
+                    if (result.isConfirmed) {
+                      await handleSubmitReview();
+                    }
+                  }, 300);
+                }}
+                variant="contained"
+                color="primary"
+              >
+                Avaliar
+              </Button>
             </DialogActions>
-          </Dialog>
+          </Dialog>;
+
+
         </div>
       </main>
     </div>
