@@ -42,31 +42,29 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-gray-800 text-white fixed top-0 left-0 h-full w-64 p-6 flex flex-col space-y-6">
-      <h1 className="text-2xl font-bold mb-6">Balcão UFF</h1>
-      
-      {user && (
-        <Link to={`/perfil/${user.id}`} className="hover:bg-gray-700 px-4 py-3 rounded transition-colors">
-          Profile: {user.name}
+    <nav className="bg-gray-800 text-white fixed top-0 left-0 w-full p-4 flex items-center justify-between z-50">
+      <Link to="/" className="text-2xl font-bold hover:text-gray-300 transition-colors">
+        Balcão UFF
+      </Link>
+      <div className="flex space-x-4">
+        <Link to="/advertises" className="hover:bg-gray-700 px-4 py-2 rounded transition-colors">
+          Lista de anúncios
         </Link>
-      )}
-      
-      <Link to="/" className="hover:bg-gray-700 px-4 py-3 rounded transition-colors">
-        Home
-      </Link>
-      <Link to="/advertises" className="hover:bg-gray-700 px-4 py-3 rounded transition-colors">
-        List Advertise
-      </Link>
-      <Link to="/users" className="hover:bg-gray-700 px-4 py-3 rounded transition-colors">
-        Advertisers
-      </Link>
-      
-      <button
-        onClick={handleLogout}
-        className="mt-auto bg-red-600 hover:bg-red-700 px-4 py-3 rounded transition-colors text-white"
-      >
-        Logout
-      </button>
+        <Link to="/users" className="hover:bg-gray-700 px-4 py-2 rounded transition-colors">
+          Anunciantes
+        </Link>
+        {user && (
+          <Link to={`/perfil/${user.id}`} className="hover:bg-gray-700 px-4 py-2 rounded transition-colors">
+            Perfil: {user.name}
+          </Link>
+        )}
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors text-white"
+        >
+          Logout
+        </button>
+      </div>
     </nav>
   );
 };

@@ -3,5 +3,6 @@ export interface Mensagem {
     senderId: number;
     conteudo: string;
     dataEnvio: string;
+    senderName: string;
   }
   

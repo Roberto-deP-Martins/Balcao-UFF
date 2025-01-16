@@ -1,3 +1,4 @@
+import { Rating } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -70,17 +71,8 @@ const UserList = () => {
     }, []);
 
     const renderStars = (reputation: number) => {
-        const fullStars = Math.floor(reputation);
-        const emptyStars = 5 - fullStars;
         return (
-            <div className="flex">
-                {[...Array(fullStars)].map((_, index) => (
-                    <span key={`full-${index}`} className="text-yellow-500">★</span>
-                ))}
-                {[...Array(emptyStars)].map((_, index) => (
-                    <span key={`empty-${index}`} className="text-gray-300">★</span>
-                ))}
-            </div>
+            <Rating name="half-rating-read" value={reputation} precision={0.5} readOnly />
         );
     };
 
@@ -93,11 +85,11 @@ const UserList = () => {
                 <table className="min-w-full bg-white">
                     <thead>
                         <tr>
-                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Função</th>
-                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Reputação</th>
-                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
+                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Função</th>
+                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Reputação</th>
+                            <th className="py-2 px-4 border-b-2 border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
                         </tr>
                     </thead>
                     <tbody>

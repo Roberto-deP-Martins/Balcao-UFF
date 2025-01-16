@@ -45,6 +45,7 @@ public class TransacaoService {
 	    
 		return TransacaoResponseDTO.builder()
 	            .anuncioId(entity.getAnuncio().getId())
+	            .anuncioName(entity.getAnuncio().getTitle())
 	            .anuncianteId(entity.getVendedor().getId())
 	            .interessadoId(entity.getComprador().getId())
 	            .dtConclusao(entity.getDataConclusao())

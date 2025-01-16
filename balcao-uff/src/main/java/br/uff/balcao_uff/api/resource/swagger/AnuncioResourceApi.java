@@ -39,4 +39,7 @@ public interface AnuncioResourceApi {
 
 	@Operation(summary = "Buscar anuncios por id do usuário")
 	public ResponseEntity<List<AnuncioResponsePerfilDTO>> getAnunciosByUserId(Long userId);
+
+	@Operation(summary = "Busca anúncios por localização dentro de um raio específico.")
+	public ResponseEntity<List<AnuncioResponseDTO>> findNearby(double lat, double lng, double radius);
 }

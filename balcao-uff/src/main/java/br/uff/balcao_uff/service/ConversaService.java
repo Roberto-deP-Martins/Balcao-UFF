@@ -150,6 +150,7 @@ public class ConversaService {
         return MessageResponseInnerDTO.builder()
                 .id(mensagem.getId())
                 .senderId(mensagem.getSender().getId())
+                .senderName(mensagem.getSender().getName())
                 .conteudo(mensagem.getContent())
                 .dataEnvio(dataEnvio)
                 .isRead(mensagem.isRead())
