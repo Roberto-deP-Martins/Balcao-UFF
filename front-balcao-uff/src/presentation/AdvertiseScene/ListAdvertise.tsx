@@ -4,8 +4,7 @@ import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Advertise } from "../../interfaces/interfaces";
-import { deleteAdvertise, getAdvertises } from "../../service/AnuncioService";
-import { getCurrentUser } from "../../service/userservice";
+import { getAdvertises } from "../../service/AnuncioService";
 
 const ListAdvertise = () => {
   const [advertises, setAdvertises] = useState<Advertise[]>([]);
@@ -30,10 +29,21 @@ const ListAdvertise = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const userId = await getCurrentUser();
-      if (userId !== null) {
-        setUser({ id: userId });
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:8080/auth/current-user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição");
       }
+
+      const data = await response.json();
+      setUser(data);
     } catch (error) {
       console.error("Erro ao buscar usuário:", error);
     }
@@ -51,7 +61,21 @@ const ListAdvertise = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteAdvertise(id);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("http://localhost:8080/anuncios/delete", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao deletar anúncio");
+        }
+
         setAdvertises(advertises.filter(ad => ad.id !== id));
         Swal.fire("Deletado!", "O anúncio foi excluído com sucesso.", "success");
       } catch (error) {
