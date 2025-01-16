@@ -11,6 +11,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { getUserProfile, getUserReviews, fetchAds, getUserReputation, getCurrentUser, fetchTransactions } from '../../service/userservice';
 import { API_CONFIG } from '../../service/config';
+import { Rating, Typography } from '@mui/material';
 
 const Profile = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -242,23 +243,23 @@ const Profile = () => {
       alert("Por favor, forneça uma nota e comentário.");
       return;
     }
-  
+
     const token = getToken();
     if (!token || !selectedTransaction) return;
-  
+
     // Definindo reviewerId e reviewedId com base na transação
     const reviewerId = currentUserId; // Usuário logado
-    const reviewedId = selectedTransaction.anuncianteId === currentUserId 
-                       ? selectedTransaction.interessadoId 
-                       : selectedTransaction.anuncianteId;
-  
+    const reviewedId = selectedTransaction.anuncianteId === currentUserId
+      ? selectedTransaction.interessadoId
+      : selectedTransaction.anuncianteId;
+
     const reviewData = {
-      reviewerId,  
-      reviewedId,  
-      rating,      
-      comment,     
+      reviewerId,
+      reviewedId,
+      rating,
+      comment,
     };
-  
+
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/reviews`, {
         method: "POST",
@@ -268,7 +269,7 @@ const Profile = () => {
         },
         body: JSON.stringify(reviewData),
       });
-  
+
       if (response.ok) {
         alert("Avaliação enviada com sucesso!");
         handleCloseDialog();  // Fechar o Dialog
@@ -280,8 +281,8 @@ const Profile = () => {
       console.error("Erro ao enviar avaliação:", error);
     }
   };
-  
-  
+
+
 
   useEffect(() => {
     if (!idUser) {
@@ -325,7 +326,7 @@ const Profile = () => {
 
           <p className="text-lg text-gray-600 mb-6">{userData?.email || 'Email do Usuário'}</p>
 
-            <div className="flex mb-6 gap-4">
+          <div className="flex mb-6 gap-4">
             <button
               className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'ads' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
               onClick={() => setSelectedTab('ads')}
@@ -341,13 +342,13 @@ const Profile = () => {
             </button>
             {currentUserId === Number(idUser) && (
               <button
-              className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'transactions' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
-              onClick={() => setSelectedTab('transactions')}
+                className={`px-6 py-2 text-lg font-medium rounded-full transition-all duration-200 ${selectedTab === 'transactions' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white text-blue-500 border-2 border-blue-500'} hover:bg-blue-600 hover:text-white`}
+                onClick={() => setSelectedTab('transactions')}
               >
-              Minhas Transações
+                Minhas Transações
               </button>
             )}
-            </div>
+          </div>
 
           {selectedTab === 'ads' && (
             <div className="w-full mt-6 space-y-4">
@@ -359,20 +360,20 @@ const Profile = () => {
                     </div>
                     <div className="flex flex-col space-y-2">
                       <p className="text-left text-gray-600">
-                      <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
+                        <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
                       </p>
                       <p className="text-left text-gray-600">
-                      <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
+                        <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
                       </p>
                       <p className="text-left text-gray-600">
-                      <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
+                        <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
                       </p>
-                        <p className="text-left text-gray-600">
-                        <span className="font-semibold">Status:</span> 
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Status:</span>
                         <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
-                        {ad.available ? ' Disponível' : ' Indisponível/Deletado'}
+                          {ad.available ? ' Disponível' : ' Indisponível/Deletado'}
                         </span>
-                        </p>
+                      </p>
                     </div>
                   </div>
                 ))
@@ -412,27 +413,31 @@ const Profile = () => {
                 <div className="w-full space-y-4">
                   {transactions.map((transaction) => (
                     <div key={transaction.anuncioId} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                      <p className="text-gray-600">Anúncio ID: {transaction.anuncioId}</p>
-                      <p className="text-gray-600">Anúnco: {transaction.anuncioName}</p>
-                      <p className="text-gray-600">Data de Conclusão: {new Date(transaction.dtConclusao).toLocaleDateString()}</p>
-                      <p className="text-gray-600">
-                        {transaction.anuncianteReview ? 'Anunciante avaliou.' : 'Anunciante ainda não avaliou.'}
-                      </p>
-                      <p className="text-gray-600">
-                        {transaction.interessadoReview ? 'Interessado avaliou.' : 'Interessado ainda não avaliou.'}
-                      </p>
-
-                      {/* Alteração para exibir o botão para todas as transações */}
-                      {currentUserId === Number(idUser) && (
-                        <Button
-                        variant="outlined"
+                      <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-xl font-semibold text-gray-800 text-left">Anúncio: {transaction.anuncioName}</h3>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
                         onClick={() => handleOpenDialog(transaction)}
-                        className="mt-4"
                       >
-                        Avaliar
+                        Avaliar usuário
                       </Button>
-                      
-                      )}
+                      </div>
+                      <p className="text-gray-600 text-left"><span className="font-semibold">Anúncio ID:</span> {transaction.anuncioId}</p>
+                      <p className="text-gray-600 text-left"><span className="font-semibold">Data de Conclusão:</span> {new Date(transaction.dtConclusao.split(' ')[0].split('/').reverse().join('-')).toLocaleDateString()}</p>
+                      <p className="text-gray-600 text-left">
+                      <span className="font-semibold">Anunciante:</span> 
+                      <span className={transaction.anuncianteReview ? 'text-green-500' : 'text-red-500'}>
+                        {transaction.anuncianteReview ? ' Avaliou' : ' Ainda não avaliou'}
+                      </span>
+                      </p>
+                      <p className="text-gray-600 text-left">
+                      <span className="font-semibold">Negociante:</span> 
+                      <span className={transaction.interessadoReview ? 'text-green-500' : 'text-red-500'}>
+                        {transaction.interessadoReview ? ' Avaliou' : '   Ainda não avaliou'}
+                      </span>
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -446,7 +451,7 @@ const Profile = () => {
           <Dialog open={openDialog} onClose={handleCloseDialog}>
             <DialogTitle>Avaliação</DialogTitle>
             <DialogContent>
-              <DialogContentText>Deixe sua avaliação para esta transação.</DialogContentText>
+              <DialogContentText>Deixe sua avaliação para esse usuário.</DialogContentText>
               <TextField
                 autoFocus
                 required
@@ -460,17 +465,15 @@ const Profile = () => {
                 onChange={(e) => setComment(e.target.value)} // Atualiza o comentário
               />
               <div className="mt-4">
-                <span>Nota: </span>
-                <select
-                  value={rating ?? ''}
-                  onChange={(e) => setRating(Number(e.target.value))} // Atualiza a nota
-                  className="p-2 border rounded-md bg-white"
-                >
-                    <option className='bg-white' value="" disabled>Escolha uma nota</option>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                    <option key={i} value={i} style={{ backgroundColor: 'white' }}>{i}</option>
-                    ))}
-                </select>
+                <Typography component="legend">Nota</Typography>
+                <Rating
+                  name="customized-10"
+                  value={rating ?? 0}
+                  max={5}
+                  onChange={(event, newValue) => {
+                    setRating(newValue);
+                  }}
+                />
               </div>
             </DialogContent>
             <DialogActions>

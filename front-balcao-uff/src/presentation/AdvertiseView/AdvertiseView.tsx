@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { CreateConversa } from '../../interfaces/interfaces';
+import Swal from 'sweetalert2';
 
 const AdvertiseView = () => {
   const location = useLocation();
@@ -118,46 +119,77 @@ const AdvertiseView = () => {
   const [aceitarNegocio, setAceitarNegocio] = useState(false);
 
   const handleAceitarNegocio = async (interessadoId: number) => {
-    if(aceitarNegocio) return;
-
-    const url = 'http://localhost:8080/transactions';
-    console.log(interessadoId, id, userId)
-    const body = JSON.stringify({
-        anuncioId: id,
-        anuncianteId: userId,
-        interessadoId: interessadoId,
+    if (aceitarNegocio) return;
+  
+    const result = await Swal.fire({
+      title: 'Tem certeza?',
+      text: 'Você está prestes a aceitar o negócio. Essa ação não pode ser desfeita!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, aceitar!',
+      cancelButtonText: 'Cancelar',
     });
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: body,
-    };
-
-    try {
-        const response = await fetch(url, options);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Detalhes do erro:', errorData); 
-            throw new Error(`Erro: ${errorData.message || 'Falha ao criar transação'}`);
-        }
-
-        const data = await response.json();
-        setAceitarNegocio(true)
-        console.log('Transação criada com sucesso:', data);
-        return data; 
-    } catch (error) {
-        console.error('Erro ao criar transação:', error);
-        throw error; // Repropaga o erro
+  
+    if (!result.isConfirmed) {
+      return;
     }
-}
+  
+    const url = 'http://localhost:8080/transactions';
+    console.log(interessadoId, id, userId);
+    const body = JSON.stringify({
+      anuncioId: id,
+      anuncianteId: userId,
+      interessadoId: interessadoId,
+    });
+  
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: body,
+    };
+  
+    try {
+      const response = await fetch(url, options);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Detalhes do erro:', errorData);
+        throw new Error(`Erro: ${errorData.message || 'Falha ao criar transação'}`);
+      }
+  
+      const data = await response.json();
+      setAceitarNegocio(true);
+      console.log('Transação criada com sucesso:', data);
+  
+      Swal.fire({
+        title: 'Negócio Aceito!',
+        text: 'A transação foi criada com sucesso.',
+        icon: 'success',
+        confirmButtonColor: '#3085d6',
+      });
+  
+      return data;
+    } catch (error) {
+      console.error('Erro ao criar transação:', error);
+  
+      Swal.fire({
+        title: 'Erro!',
+        text: 'Ocorreu um erro ao aceitar o negócio. Por favor, tente novamente.',
+        icon: 'error',
+        confirmButtonColor: '#d33',
+      });
+  
+      throw error;
+    }
+  };
+  
 
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getChats = async (notInit = false) => {
     const result = await getConversas()
     setListConversation(result)
@@ -200,32 +232,52 @@ const AdvertiseView = () => {
   const [setFecharNegocio, setFecharNegocioLoading] = useState(false);
 
   const handleFecharNegocio = async () => {
-      if (!selectedConversation) return;
+    if (!selectedConversation) return;
+  
+    const result = await Swal.fire({
+      title: 'Você tem certeza?',
+      text: 'Deseja realmente fechar este negócio? Essa ação não pode ser desfeita.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, fechar negócio!',
+      cancelButtonText: 'Cancelar',
+    });
+  
+    if (result.isConfirmed) {
       const url = `http://localhost:8080/conversas/fechar-negocio/${selectedConversation.id}`;
-    
+  
       const headers = {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + localStorage.getItem('token'),
       };
-    
+  
       try {
         const response = await fetch(url, {
-          method: "PUT",
+          method: 'PUT',
           headers: headers,
         });
-    
+  
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("Erro ao fechar negócio:", errorData);
+          console.error('Erro ao fechar negócio:', errorData);
+          Swal.fire('Erro!', 'Não foi possível fechar o negócio.', 'error');
           return;
         }
-        setFecharNegocioLoading(true)
+  
         const data = await response.json();
-        console.log("Negócio fechado com sucesso:", data);
+        setFecharNegocioLoading(true);
+  
+        Swal.fire('Sucesso!', 'Negócio fechado com sucesso!', 'success');
+        console.log('Negócio fechado com sucesso:', data);
       } catch (error) {
-        console.error("Erro na requisição:", error);
+        console.error('Erro na requisição:', error);
+        Swal.fire('Erro!', 'Ocorreu um erro ao fechar o negócio.', 'error');
       }
+    }
   };
+  
 
   const handleCommentSubmitInit = async () => {
     const result = await initConversa(comment)
