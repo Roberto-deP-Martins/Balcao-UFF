@@ -45,10 +45,11 @@ const CreateAdvertise = () => {
         e.preventDefault();
         setError("");
 
-        if (!image1 || !image2 || !image3) {
+        // Verifica se todos os campos obrigatórios estão preenchidos
+        if (!title || !description || !category || price === "" || !contactInfo || !address || !latitude || !longitude || !image1 || !image2 || !image3) {
             Swal.fire({
                 title: "Erro",
-                text: "Por favor, envie exatamente 3 imagens.",
+                text: "Todos os campos são obrigatórios. Por favor, preencha todos os campos e envie 3 imagens.",
                 icon: "error",
                 confirmButtonText: "Ok",
             });
