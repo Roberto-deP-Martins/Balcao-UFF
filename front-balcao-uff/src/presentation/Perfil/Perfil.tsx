@@ -403,71 +403,66 @@ const Profile = () => {
           </div>
 
           {selectedTab === 'ads' && (
-            <div className="w-full mt-6">
-              <Navbar />
-              <main className="flex flex-1 flex-col items-center p-6">
-                <div className="flex flex-col items-center bg-white rounded-xl shadow-xl p-8 w-full max-w-3xl">
-                  {/* Filtro de status */}
-                  <div className="flex mb-4 gap-4">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={statusFilter.available}
-                          onChange={(e) => handleStatusFilterChange(e, 'available')}
-                          name="statusAvailable"
-                          color="primary"
-                        />
-                      }
-                      label="Disponível"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={statusFilter.unavailable}
-                          onChange={(e) => handleStatusFilterChange(e, 'unavailable')}
-                          name="statusUnavailable"
-                          color="primary"
-                        />
-                      }
-                      label="Indisponível/Deletado"
-                    />
-                  </div>
-
-                  {/* Exibição dos anúncios filtrados */}
-                  <div className="w-full mt-6 space-y-4">
-                    {filteredAds.length > 0 ? (
-                      filteredAds.map((ad, index) => (
-                        <div key={index} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
-                          </div>
-                          <div className="flex flex-col space-y-2">
-                            <p className="text-left text-gray-600">
-                              <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
-                            </p>
-                            <p className="text-left text-gray-600">
-                              <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
-                            </p>
-                            <p className="text-left text-gray-600">
-                              <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
-                            </p>
-                            <p className="text-left text-gray-600">
-                              <span className="font-semibold">Status:</span>
-                              <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
-                                {ad.available ? 'Disponível' : 'Indisponível/Deletado'}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-center text-gray-500">Nenhum anúncio encontrado.</p>
-                    )}
-                  </div>
-                </div>
-              </main>
+          <div className="w-full mt-6">
+            {/* Filtro de status */}
+            <div className="flex mb-4 gap-4">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusFilter.available}
+                    onChange={(e) => handleStatusFilterChange(e, 'available')}
+                    name="statusAvailable"
+                    color="primary"
+                  />
+                }
+                label="Disponível"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={statusFilter.unavailable}
+                    onChange={(e) => handleStatusFilterChange(e, 'unavailable')}
+                    name="statusUnavailable"
+                    color="primary"
+                  />
+                }
+                label="Indisponível/Deletado"
+              />
             </div>
-          )}
+
+            {/* Exibição dos anúncios filtrados */}
+            <div className="w-full mt-6 space-y-4">
+              {filteredAds.length > 0 ? (
+                filteredAds.map((ad, index) => (
+                  <div key={index} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
+                      </p>
+                      <p className="text-left text-gray-600">
+                        <span className="font-semibold">Status:</span>
+                        <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
+                          {ad.available ? 'Disponível' : 'Indisponível/Deletado'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">Nenhum anúncio encontrado.</p>
+              )}
+            </div>
+          </div>
+        )}
 
           {selectedTab === 'reviews' && (
             <div className="w-full mt-6">
