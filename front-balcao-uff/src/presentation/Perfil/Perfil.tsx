@@ -413,6 +413,7 @@ const Profile = () => {
                   {transactions.map((transaction) => (
                     <div key={transaction.anuncioId} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
                       <p className="text-gray-600">Anúncio ID: {transaction.anuncioId}</p>
+                      <p className="text-gray-600">Anúnco: {transaction.anuncioName}</p>
                       <p className="text-gray-600">Data de Conclusão: {new Date(transaction.dtConclusao).toLocaleDateString()}</p>
                       <p className="text-gray-600">
                         {transaction.anuncianteReview ? 'Anunciante avaliou.' : 'Anunciante ainda não avaliou.'}
@@ -465,10 +466,10 @@ const Profile = () => {
                   onChange={(e) => setRating(Number(e.target.value))} // Atualiza a nota
                   className="p-2 border rounded-md"
                 >
-                  <option value="" disabled>Escolha uma nota</option>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
+                    <option value="" disabled>Escolha uma nota</option>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                    <option key={i} value={i} style={{ backgroundColor: 'white' }}>{i}</option>
+                    ))}
                 </select>
               </div>
             </DialogContent>
