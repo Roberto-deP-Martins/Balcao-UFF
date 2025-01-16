@@ -11,7 +11,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { getUserProfile, getUserReviews, fetchAds, getUserReputation, getCurrentUser, fetchTransactions } from '../../service/userservice';
 import { API_CONFIG } from '../../service/config';
-import { Rating, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Rating, Typography } from '@mui/material';
 import Swal from 'sweetalert2';
 
 const Profile = () => {
@@ -28,6 +28,12 @@ const Profile = () => {
   const [comment, setComment] = useState('');
   const navigate = useNavigate();
   const { idUser } = useParams();
+  // const [filterAvailable, setFilterAvailable] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<{ available: boolean; unavailable: boolean }>({
+    available: false,
+    unavailable: false,
+  });
+  const [filteredAds, setFilteredAds] = useState<Ad[]>([]);
 
   const getToken = () => {
     const token = localStorage.getItem("token");
@@ -37,6 +43,47 @@ const Profile = () => {
     }
     return token;
   };
+
+  // Efeito para pegar os anúncios
+  useEffect(() => {
+    if (!idUser) {
+      navigate('/login');
+    } else {
+      fetchAds(idUser).then((data) => {
+        if (data) {
+          setAds(data);
+          setFilteredAds(data); // Inicialmente, mostramos todos os anúncios
+        }
+      });
+    }
+  }, [idUser, navigate]);
+
+  useEffect(() => {
+    // Filtra os anúncios com base nos filtros de status
+    const filtered = ads.filter((ad) => {
+      // Se ambos os filtros estiverem desmarcados, mostramos todos os anúncios
+      if (!statusFilter.available && !statusFilter.unavailable) {
+        return true;
+      }
+      if (statusFilter.available && ad.available) {
+        return true;
+      }
+      if (statusFilter.unavailable && !ad.available) {
+        return true;
+      }
+      return false;
+    });
+    setFilteredAds(filtered);
+  }, [statusFilter, ads]);
+
+  // Função para lidar com as mudanças de filtro de status
+  const handleStatusFilterChange = (event: React.ChangeEvent<HTMLInputElement>, status: string) => {
+    setStatusFilter((prevState) => ({
+      ...prevState,
+      [status]: event.target.checked,
+    }));
+  };
+  //fim de filtro de status
 
 
   useEffect(() => {
@@ -356,35 +403,69 @@ const Profile = () => {
           </div>
 
           {selectedTab === 'ads' && (
-            <div className="w-full mt-6 space-y-4">
-              {ads.length > 0 ? (
-                ads.map((ad, index) => (
-                  <div key={index} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
-                    </div>
-                    <div className="flex flex-col space-y-2">
-                      <p className="text-left text-gray-600">
-                        <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
-                      </p>
-                      <p className="text-left text-gray-600">
-                        <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
-                      </p>
-                      <p className="text-left text-gray-600">
-                        <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
-                      </p>
-                      <p className="text-left text-gray-600">
-                        <span className="font-semibold">Status:</span>
-                        <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
-                          {ad.available ? ' Disponível' : ' Indisponível/Deletado'}
-                        </span>
-                      </p>
-                    </div>
+            <div className="w-full mt-6">
+              <Navbar />
+              <main className="flex flex-1 flex-col items-center p-6">
+                <div className="flex flex-col items-center bg-white rounded-xl shadow-xl p-8 w-full max-w-3xl">
+                  {/* Filtro de status */}
+                  <div className="flex mb-4 gap-4">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={statusFilter.available}
+                          onChange={(e) => handleStatusFilterChange(e, 'available')}
+                          name="statusAvailable"
+                          color="primary"
+                        />
+                      }
+                      label="Disponível"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={statusFilter.unavailable}
+                          onChange={(e) => handleStatusFilterChange(e, 'unavailable')}
+                          name="statusUnavailable"
+                          color="primary"
+                        />
+                      }
+                      label="Indisponível/Deletado"
+                    />
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-500">Nenhum anúncio.</p>
-              )}
+
+                  {/* Exibição dos anúncios filtrados */}
+                  <div className="w-full mt-6 space-y-4">
+                    {filteredAds.length > 0 ? (
+                      filteredAds.map((ad, index) => (
+                        <div key={index} className="flex flex-col bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-semibold text-gray-800">{ad.title || 'Título não disponível'}</h3>
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <p className="text-left text-gray-600">
+                              <span className="font-semibold">Categoria:</span> {ad.category || 'Não informada'}
+                            </p>
+                            <p className="text-left text-gray-600">
+                              <span className="font-semibold">Localização:</span> {ad.location || 'Não informada'}
+                            </p>
+                            <p className="text-left text-gray-600">
+                              <span className="font-semibold">Preço:</span> {ad.price ? `$${ad.price}` : 'Doação'}
+                            </p>
+                            <p className="text-left text-gray-600">
+                              <span className="font-semibold">Status:</span>
+                              <span className={ad.available ? 'text-green-500' : 'text-red-500'}>
+                                {ad.available ? 'Disponível' : 'Indisponível/Deletado'}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">Nenhum anúncio encontrado.</p>
+                    )}
+                  </div>
+                </div>
+              </main>
             </div>
           )}
 
@@ -505,8 +586,7 @@ const Profile = () => {
                 Avaliar
               </Button>
             </DialogActions>
-          </Dialog>;
-
+          </Dialog>
 
         </div>
       </main>
