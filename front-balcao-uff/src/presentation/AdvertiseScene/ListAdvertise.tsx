@@ -9,7 +9,7 @@ import { getCurrentUser } from "../../service/userservice";
 
 const ListAdvertise = () => {
   const [advertises, setAdvertises] = useState<Advertise[]>([]);
-  const [category, setCategory] = useState<string>("");
+  // const [category, setCategory] = useState<string>("");
   const [showNearby, setShowNearby] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [searchText, setSearchText] = useState<string>("");
