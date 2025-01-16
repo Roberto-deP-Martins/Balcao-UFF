@@ -23,6 +23,32 @@ const CreateAdvertise = () => {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [error, setError] = useState<string>("");
+    const categories = [
+        "Eletrônicos",
+        "Roupas",
+        "Curos e Aulas",
+        "Automóveis",
+        "Imóveis",
+        "Beleza",
+        "Esportes",
+        "Móveis",
+        "Brinquedos",
+        "Livros",
+        "Música",
+        "Jardinagem",
+        "Ferramentas",
+        "Utensílios Domésticos",
+        "Computadores",
+        "Celulares",
+        "Roupas de Bebê",
+        "Animais",
+        "Jogos",
+        "Artesanato",
+        "Colecionáveis", 
+        "Papelaria",
+    ];
+
+
 
     const navigate = useNavigate();
 
@@ -146,13 +172,17 @@ const CreateAdvertise = () => {
                         onChange={(e) => setDescription(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
                     />
-                    <input
-                        type="text"
-                        placeholder="Categoria"
+                    <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
-                    />
+                        className="w-full bg-white p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    >
+                        <option value="">Selecione uma categoria</option>
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+
                     <input
                         type="number"
                         placeholder="Preço"

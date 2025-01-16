@@ -1,27 +1,36 @@
 import { useEffect, useState } from "react";
 import AdvertiseCard from "../../components/AdvertiseCard";
-import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Advertise } from "../../interfaces/interfaces";
 import { getAdvertises } from "../../service/AnuncioService";
 
 const ListAdvertise = () => {
   const [advertises, setAdvertises] = useState<Advertise[]>([]);
-  // const [category, setCategory] = useState<string>("");
-  const [showNearby, setShowNearby] = useState<boolean>(false);
-  const [user, setUser] = useState<any>(null);
-  const [searchText, setSearchText] = useState<string>("");
+  const [filteredAdvertises, setFilteredAdvertises] = useState<Advertise[]>([]);
+  const [searchTitle, setSearchTitle] = useState<string>("");
+  const [searchCategory, setSearchCategory] = useState<string>("");
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [user, setUser] = useState<any>(null); // Estado para armazenar o usuário
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAdvertises();
-    fetchCurrentUser();
+    fetchCurrentUser(); // Buscar dados do usuário
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchTitle, searchCategory, minPrice, maxPrice]);
 
   const fetchAdvertises = async () => {
     try {
       const data = await getAdvertises();
       setAdvertises(data);
+      setFilteredAdvertises(data);
     } catch (error) {
       console.error("Erro ao buscar anúncios:", error);
     }
@@ -49,6 +58,22 @@ const ListAdvertise = () => {
     }
   };
 
+  const handleSearch = () => {
+    const filtered = advertises.filter((ad) => {
+      const matchTitle =
+        searchTitle.trim() === "" ||
+        ad.title.toLowerCase().includes(searchTitle.toLowerCase());
+      const matchCategory =
+        searchCategory.trim() === "" ||
+        ad.category.toLowerCase().includes(searchCategory.toLowerCase());
+      const matchPrice =
+        (minPrice === null || ad.price >= minPrice) &&
+        (maxPrice === null || ad.price <= maxPrice);
+      return matchTitle && matchCategory && matchPrice;
+    });
+    setFilteredAdvertises(filtered);
+  };
+
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
       title: "Tem certeza?",
@@ -63,21 +88,28 @@ const ListAdvertise = () => {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch("http://localhost:8080/anuncios/delete", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id }),
-        });
+        const response = await fetch(
+          "http://localhost:8080/anuncios/delete",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Erro ao deletar anúncio");
         }
 
-        setAdvertises(advertises.filter(ad => ad.id !== id));
-        Swal.fire("Deletado!", "O anúncio foi excluído com sucesso.", "success");
+        await fetchAdvertises(); // Atualiza a tabela de anúncios
+        Swal.fire(
+          "Deletado!",
+          "O anúncio foi excluído com sucesso.",
+          "success"
+        );
       } catch (error) {
         console.error("Erro ao deletar anúncio:", error);
         Swal.fire("Erro", "Ocorreu um erro ao deletar o anúncio.", "error");
@@ -85,108 +117,79 @@ const ListAdvertise = () => {
     }
   };
 
-  const handleSearch = () => {
-    if (!searchText.trim()) {
-      fetchAdvertises();
-      return;
-    }
-
-    const filteredAds = advertises.filter(ad =>
-      ad.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      ad.description.toLowerCase().includes(searchText.toLowerCase()) ||
-      ad.category.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setAdvertises(filteredAds);
-  };
-
-  const handleSearchByLocation = async () => {
-    if (showNearby) {
-      fetchAdvertises();
-      setShowNearby(false);
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      console.error("Geolocalização não é suportada pelo seu navegador.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-
-      try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(`http://localhost:8080/anuncios/nearby?lat=${latitude}&lng=${longitude}&radius=10`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Erro na requisição");
-        }
-
-        const data = await response.json();
-        setAdvertises(data);
-        setShowNearby(true);
-      } catch (error) {
-        console.error("Erro ao buscar anúncios próximos:", error);
-      }
-    }, (error) => {
-      console.error("Erro ao obter localização:", error);
-    });
-  };
-
   return (
     <div className="w-screen h-full p-4">
       <div className="text-xl font-semibold mb-4">Anúncios</div>
 
-      <div className="mb-4 flex items-center justify-between">
-        {/* Input de busca por texto */}
-        <input
-          type="text"
-          placeholder="Pesquisar por título, descrição, categoria ou local"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
+      <div className="mb-4 flex flex-wrap gap-4 items-end">
+        {/* Input for Title */}
+        <div className="flex flex-col w-1/4">
+          <label className="mb-2 font-medium">Título</label>
+          <input
+            type="text"
+            placeholder="Pesquisar por título"
+            value={searchTitle}
+            onChange={(e) => setSearchTitle(e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Input for Category */}
+        <div className="flex flex-col w-1/4">
+          <label className="mb-2 font-medium">Categoria</label>
+          <input
+            type="text"
+            placeholder="Pesquisar por categoria"
+            value={searchCategory}
+            onChange={(e) => setSearchCategory(e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Input for Minimum Price */}
+        <div className="flex flex-col w-1/6">
+          <label className="mb-2 font-medium">Preço mínimo</label>
+          <input
+            type="number"
+            placeholder="Preço mínimo"
+            value={minPrice || ""}
+            onChange={(e) =>
+              setMinPrice(e.target.value ? parseFloat(e.target.value) : null)
             }
-          }}
-          className="p-2 border border-gray-300 rounded mb-2 w-2/3"
-        />
-        <button
-          onClick={handleSearch}
-          className="w-10 h-10 flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 ml-2"
-        >
-          <FaSearch />
-        </button>
+            className="p-2 border border-gray-300 rounded"
+          />
+        </div>
 
-        <Link to="/create-advertise" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md ml-2">
-          Criar Novo Anúncio
-        </Link>
-      </div>
+        {/* Input for Maximum Price */}
+        <div className="flex flex-col w-1/6">
+          <label className="mb-2 font-medium">Preço máximo</label>
+          <input
+            type="number"
+            placeholder="Preço máximo"
+            value={maxPrice || ""}
+            onChange={(e) =>
+              setMaxPrice(e.target.value ? parseFloat(e.target.value) : null)
+            }
+            className="p-2 border border-gray-300 rounded"
+          />
+        </div>
 
-      <div className="mb-4 flex items-center space-x-2">
+        {/* Criar Anúncio Button */}
         <button
-          onClick={handleSearchByLocation}
-          className="w-10 h-10 flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+          onClick={() => navigate("/create-advertise")}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md ml-2"
         >
-          <FaMapMarkerAlt />
+          <AddIcon className="mr-2" />
+          Criar Anúncio
         </button>
-        <span>{showNearby ? "Todos os anúncios" : "Buscar Anúncios Próximos"}</span>
       </div>
 
       {/* Lista de Anúncios */}
-      {advertises.length > 0 ? (
+      {filteredAdvertises.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {advertises.map((ad: any) => (
+          {filteredAdvertises.map((ad: any) => (
             <div key={ad.id} className="relative">
               <AdvertiseCard ad={ad} />
-              {/* Botão de Deletar */}
               {user && (user.id === ad.userId || user.role === "ADMIN") && (
                 <button
                   onClick={() => handleDelete(ad.id)}
@@ -199,7 +202,7 @@ const ListAdvertise = () => {
           ))}
         </div>
       ) : (
-        <p className="text-gray-700">Carregando ou nenhum anúncio disponível...</p>
+        <p className="text-gray-700">Nenhum anúncio encontrado...</p>
       )}
     </div>
   );
