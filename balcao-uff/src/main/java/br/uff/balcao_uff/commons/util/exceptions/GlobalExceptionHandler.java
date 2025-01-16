@@ -112,4 +112,12 @@ public class GlobalExceptionHandler {
     												ex.getMessage());
     	return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+    
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<Object> handleDuplicateReviewException(DuplicateReviewException ex){
+    	Map<String, Object> body = createResponseBody(HttpStatus.CONFLICT, 
+    												"Usuário já avaliado", 
+    												ex.getMessage());
+    	return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
 }

@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import br.uff.balcao_uff.api.dto.response.ReputationResponseDTO;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import br.uff.balcao_uff.api.dto.request.UserReviewRequestDTO;
+import br.uff.balcao_uff.api.dto.response.ReputationResponseDTO;
 import br.uff.balcao_uff.api.dto.response.UserReviewResponseDTO;
+import br.uff.balcao_uff.commons.util.exceptions.DuplicateReviewException;
 import br.uff.balcao_uff.commons.util.response.ResponseFormatter;
 import br.uff.balcao_uff.entity.UserEntity;
 import br.uff.balcao_uff.entity.UserReviewEntity;
@@ -31,33 +33,38 @@ public class UserReviewService {
      * @return Mapa formatado com a mensagem de sucesso.
      */
     public Map<String, Object> addReview(UserReviewRequestDTO reviewRequestDTO) {
-        // Valida a nota (rating)
-        if (reviewRequestDTO.getRating() < 1 || reviewRequestDTO.getRating() > 5) {
-            throw new IllegalArgumentException("A nota deve estar entre 1 e 5.");
+        try {
+            // Valida a nota (rating)
+            if (reviewRequestDTO.getRating() < 1 || reviewRequestDTO.getRating() > 5) {
+                throw new IllegalArgumentException("A nota deve estar entre 1 e 5.");
+            }
+
+            // Atualiza o status da transação
+            transacaoService.updateReviewStatus(reviewRequestDTO.getReviewerId(), reviewRequestDTO.getReviewedId());
+
+            // Busca os usuários envolvidos
+            UserEntity reviewer = userRepository.findById(reviewRequestDTO.getReviewerId())
+                    .orElseThrow(() -> new RuntimeException("Usuário avaliador não encontrado"));
+            UserEntity reviewed = userRepository.findById(reviewRequestDTO.getReviewedId())
+                    .orElseThrow(() -> new RuntimeException("Usuário avaliado não encontrado"));
+
+            // Cria a entidade de avaliação
+            UserReviewEntity review = UserReviewEntity.builder()
+                    .reviewer(reviewer)
+                    .reviewed(reviewed)
+                    .rating(reviewRequestDTO.getRating())
+                    .comment(reviewRequestDTO.getComment())
+                    .build();
+
+            // Salva a avaliação no banco de dados
+            userReviewRepository.save(review);
+
+            // Retorna a resposta formatada de sucesso
+            return ResponseFormatter.createSuccessResponse("Avaliação adicionada com sucesso!");
+        } catch (DataIntegrityViolationException ex) {
+            // Lança exceção personalizada caso a chave única seja violada
+            throw new DuplicateReviewException("Já existe uma avaliação entre esses usuários.");
         }
-
-        // Atualiza o status da transação
-        transacaoService.updateReviewStatus(reviewRequestDTO.getReviewerId(), reviewRequestDTO.getReviewedId());
-
-        // Busca os usuários envolvidos
-        UserEntity reviewer = userRepository.findById(reviewRequestDTO.getReviewerId())
-                .orElseThrow(() -> new RuntimeException("Usuário avaliador não encontrado"));
-        UserEntity reviewed = userRepository.findById(reviewRequestDTO.getReviewedId())
-                .orElseThrow(() -> new RuntimeException("Usuário avaliado não encontrado"));
-
-        // Cria a entidade de avaliação
-        UserReviewEntity review = UserReviewEntity.builder()
-                .reviewer(reviewer)
-                .reviewed(reviewed)
-                .rating(reviewRequestDTO.getRating())
-                .comment(reviewRequestDTO.getComment())
-                .build();
-
-        // Salva a avaliação no banco de dados
-        userReviewRepository.save(review);
-
-        // Retorna a resposta formatada de sucesso
-        return ResponseFormatter.createSuccessResponse("Avaliação adicionada com sucesso!");
     }
 
     public ReputationResponseDTO calculateReputation(Long userId) {
